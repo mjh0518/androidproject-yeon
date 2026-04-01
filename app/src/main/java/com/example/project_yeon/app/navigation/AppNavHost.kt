@@ -1,0 +1,106 @@
+package com.example.project_yeon.app.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.project_yeon.feature.person.splash.SplashScreen
+import com.example.project_yeon.feature.person.add.AddPersonScreen
+import com.example.project_yeon.feature.person.detail.DetailPersonScreen
+import com.example.project_yeon.feature.person.list.HomeListScreen
+import com.example.project_yeon.feature.person.modify.ModifyPersonScreen
+import com.example.project_yeon.feature.person.trash.TrashScreen
+
+@Composable
+fun AppNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = navController,
+        startDestination = AppRoute.Splash.route,
+        modifier = modifier
+    ) {
+        composable(AppRoute.Splash.route) {
+            SplashScreen(
+                onNavigateToHome = {
+                    navController.navigate(AppRoute.HomeList.route) {
+                        popUpTo(AppRoute.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(AppRoute.HomeList.route) {
+            HomeListScreen(
+                onNavigateToAdd = {
+                    navController.navigate(AppRoute.AddPerson.route)
+                },
+                onNavigateToDetail = { personId ->
+                    navController.navigate(AppRoute.DetailPerson.createRoute(personId))
+                },
+                onNavigateToTrash = {
+                    navController.navigate(AppRoute.Trash.route)
+                }
+            )
+        }
+
+        composable(AppRoute.AddPerson.route) {
+            AddPersonScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = AppRoute.DetailPerson.route,
+            arguments = listOf(
+                navArgument("personId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val personId = backStackEntry.arguments?.getLong("personId") ?: return@composable
+
+            DetailPersonScreen(
+                personId = personId,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onNavigateToModify = { id ->
+                    navController.navigate(AppRoute.ModifyPerson.createRoute(id))
+                }
+            )
+        }
+
+        composable(
+            route = AppRoute.ModifyPerson.route,
+            arguments = listOf(
+                navArgument("personId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val personId = backStackEntry.arguments?.getLong("personId") ?: return@composable
+
+            ModifyPersonScreen(
+                personId = personId,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(AppRoute.Trash.route) {
+            TrashScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+    }
+}
