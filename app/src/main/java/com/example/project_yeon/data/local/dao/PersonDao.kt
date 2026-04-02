@@ -10,7 +10,7 @@ interface PersonDao {
     fun getAllFlow(): Flow<List<PersonEntity>>
 
     @Query("SELECT * FROM person WHERE personId = :personId")
-    fun getById(personId: Long): PersonEntity
+    suspend fun getById(personId: Long): PersonEntity?
 
     // FR - 01 추가
     @Insert(onConflict = OnConflictStrategy.ABORT)

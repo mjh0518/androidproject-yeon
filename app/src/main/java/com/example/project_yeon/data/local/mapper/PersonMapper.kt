@@ -35,11 +35,11 @@ fun PersonEntity.toDomain(): Person {
     )
 }
 
-fun PersonCreateRequest.toEntity(): PersonEntity {
-    val now = System.currentTimeMillis()
-
+fun PersonCreateRequest.toEntity(
+    createdAt: Long,
+    updatedAt: Long
+): PersonEntity {
     return PersonEntity(
-        personId = 0L, // autoGenerate라면 0
         name = name,
         gender = gender,
         birthDate = birthDate,
@@ -62,8 +62,8 @@ fun PersonCreateRequest.toEntity(): PersonEntity {
         job = job,
         memo = memo,
         pinned = false,
-        createdAt = now,
-        updatedAt = now
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }
 fun PersonUpdateRequest.toEntity(old: PersonEntity): PersonEntity {
