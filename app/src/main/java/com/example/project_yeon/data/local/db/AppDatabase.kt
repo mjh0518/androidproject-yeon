@@ -9,7 +9,7 @@ import com.example.project_yeon.data.local.entity.*
     entities = [
         PersonEntity::class,
         HiddenPersonEntity::class,
-        SecurityConfigEntity::class
+     //   SecurityConfigEntity::class
     ],
     version = 1,
     exportSchema = false
@@ -17,5 +17,5 @@ import com.example.project_yeon.data.local.entity.*
 abstract class AppDataBase : RoomDatabase(){
     abstract fun personDao() : PersonDao
     abstract fun historyDao() : HiddenPersonDao
-    abstract fun securityDao() : SecurityConfigDao
+    //abstract fun securityDao() : SecurityConfigDao
 }

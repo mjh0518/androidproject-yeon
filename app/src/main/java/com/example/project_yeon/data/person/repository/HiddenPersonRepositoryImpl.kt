@@ -3,18 +3,23 @@ package com.example.project_yeon.data.person.repository
 import com.example.project_yeon.data.local.dao.HiddenPersonDao
 import com.example.project_yeon.data.local.dao.PersonDao
 import com.example.project_yeon.data.local.entity.HiddenPersonEntity
+import com.example.project_yeon.data.local.mapper.toDomain
+import com.example.project_yeon.domain.person.model.HiddenPerson
 import com.example.project_yeon.domain.person.repository.HiddenPersonRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class HiddenPersonRepositoryImpl (
     private val personDao: PersonDao,
     private val hiddenpersonDao : HiddenPersonDao
 ) : HiddenPersonRepository{
     override suspend fun getHiddenPerson(id: Long) =
-        hiddenpersonDao.getById(id)
+        hiddenpersonDao.getById(id)?.toDomain()
 
-    override fun getHiddenPersons(): Flow<List<HiddenPersonEntity>> =
-        hiddenpersonDao.getAllFlow()
+    override fun getHiddenPersons(): Flow<List<HiddenPerson>> =
+        hiddenpersonDao.getAllFlow().map{entities ->
+            entities.map{it.toDomain()}
+        }
 
     override suspend fun restorePersonFromTrash(personId: Long) {
         // TODO:
