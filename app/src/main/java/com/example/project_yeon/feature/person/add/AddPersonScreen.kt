@@ -44,10 +44,13 @@ import androidx.compose.ui.unit.sp
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.component.button.PrimaryButton
 import com.example.project_yeon.core.ui.component.button.SecondaryButton
+import com.example.project_yeon.core.ui.component.inputFfiled.AddressInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.DateInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.ExpandableTextField
+import com.example.project_yeon.core.ui.component.inputFfiled.HyperlinkInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.KeywordInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.YeonOutlinedTextField
+import com.example.project_yeon.core.ui.etc.DropdownSelectorField
 import com.example.project_yeon.core.ui.etc.RatingBar
 import com.example.project_yeon.core.ui.theme.YeonTextMuted
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
@@ -59,6 +62,7 @@ fun AddPersonScreen(
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
     val genderOptions = listOf("남", "여")
+
     val mbtiList = listOf(
         "ISTJ", "ISFJ", "INFJ", "INTJ",
         "ISTP", "ISFP", "INFP", "INTP",
@@ -78,6 +82,10 @@ fun AddPersonScreen(
     var selectedIndexOfMbti by remember { mutableStateOf(0) }
     var expandedOfPersonal by remember { mutableStateOf(false) }
     var selectedIndexOfPersonal by remember { mutableStateOf(0) }
+    var selectedMbti by rememberSaveable { mutableStateOf("") }
+    var selectedPersonality by rememberSaveable { mutableStateOf("") }
+
+
     var temp = ""
 
     Column(
@@ -86,7 +94,8 @@ fun AddPersonScreen(
             .paint(
                 painterResource(id = R.drawable.bg_paper_light),
                 contentScale = ContentScale.Crop
-            ).systemBarsPadding(),
+            )
+            .systemBarsPadding(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -117,7 +126,10 @@ fun AddPersonScreen(
             // 프로필 사진 : 일단은 이미지뷰와 이벤트 없는 아이콘 버튼으로 대체 , 향후 구현에 따라 변화하는 이미지뷰로 변경
             item {
                 Box(
-                    modifier = Modifier.width(120.dp).height(120.dp).padding(12.dp)
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(120.dp)
+                        .padding(12.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -162,22 +174,38 @@ fun AddPersonScreen(
             }
             //이름
             item {
-                Text(
-                    text = "이름",
-                    color = YeonTextMuted,
-                    fontFamily = font_nanum_gyuri,
-                    fontSize = 32.sp,
-                )
-                YeonOutlinedTextField("", {}, "", "",)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "이름",
+                        color = YeonTextMuted,
+                        fontFamily = font_nanum_gyuri,
+                        fontSize = 32.sp,
+                    )
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
+                }
+                YeonOutlinedTextField("", {}, "", "")
             }
             //성별
             item {
-                Text(
-                    text = "성별",
-                    color = YeonTextMuted,
-                    fontFamily = font_nanum_gyuri,
-                    fontSize = 32.sp,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "성별",
+                        color = YeonTextMuted,
+                        fontFamily = font_nanum_gyuri,
+                        fontSize = 32.sp,
+                    )
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -224,105 +252,91 @@ fun AddPersonScreen(
             }
             //생년월일
             item {
-                Text(
-                    text = "생년월일",
-                    color = YeonTextMuted,
-                    fontFamily = font_nanum_gyuri,
-                    fontSize = 32.sp,
-                )
-                YeonOutlinedTextField("", {}, "", "", )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "생년월일",
+                        color = YeonTextMuted,
+                        fontFamily = font_nanum_gyuri,
+                        fontSize = 32.sp,
+                    )
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
+                }
+                YeonOutlinedTextField("", {}, "", "")
             }
             //친밀도
             item {
-                Text(
-                    text = "당신과의 친밀도",
-                    color = YeonTextMuted,
-                    fontFamily = font_nanum_gyuri,
-                    fontSize = 32.sp,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "당신과의 친밀도",
+                        color = YeonTextMuted,
+                        fontFamily = font_nanum_gyuri,
+                        fontSize = 32.sp,
+                    )
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
+                }
                 RatingBar(0, onRatingChanged = {})
             }
             //MBTI
             item {
-                Text(
-                    text = "MBTI",
-                    color = YeonTextMuted,
-                    fontFamily = font_nanum_gyuri,
-                    fontSize = 32.sp,
-                )
-                Box(modifier = Modifier.wrapContentSize()) {
-                    // 드롭다운을 호출할 버튼/컴포넌트
-                    TextButton(
-                        onClick = { expandedOfMbti = true },
-                        modifier = Modifier
-                            .border(2.dp, Color.Black)
-                            .background(Color.White)
-                    ) {
-                        Text(
-                            text = mbtiList[selectedIndexOfMbti],
-                            color = YeonTextMuted,
-                            fontFamily = font_nanum_gyuri,
-                            fontSize = 32.sp,
-                        )
-                    }
-
-                    // 드롭다운 메뉴
-                    DropdownMenu(
-                        expanded = expandedOfMbti,
-                        onDismissRequest = { expandedOfMbti = false }
-                    ) {
-                        mbtiList.forEachIndexed { index, title ->
-                            DropdownMenuItem(
-                                text = { Text(text = title) },
-                                onClick = {
-                                    selectedIndexOfMbti = index
-                                    expandedOfMbti = false // 선택 후 메뉴 닫기
-                                }
-                            )
-                        }
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "MBTI",
+                        color = YeonTextMuted,
+                        fontFamily = font_nanum_gyuri,
+                        fontSize = 32.sp,
+                    )
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
                 }
+                DropdownSelectorField(
+                    value = selectedMbti ?: "",
+                    expanded = expandedOfMbti,
+                    onExpandedChange = { expandedOfMbti = it },
+                    items = mbtiList,
+                    onItemSelected = { selected ->
+                        selectedMbti = selected
+                    }
+                )
             }
             //성격 : 키워드 선택형
             item {
-                Text(
-                    text = "성격",
-                    color = YeonTextMuted,
-                    fontFamily = font_nanum_gyuri,
-                    fontSize = 32.sp,
-                )
-                Box(modifier = Modifier.wrapContentSize()) {
-                    // 드롭다운을 호출할 버튼/컴포넌트
-                    TextButton(
-                        onClick = { expandedOfPersonal = true },
-                        modifier = Modifier
-                            .border(2.dp, Color.Black)
-                            .background(Color.White)
-                    ) {
-                        Text(
-                            text = personalityList[selectedIndexOfPersonal],
-                            color = YeonTextMuted,
-                            fontFamily = font_nanum_gyuri,
-                            fontSize = 32.sp,
-                        )
-                    }
-
-                    // 드롭다운 메뉴
-                    DropdownMenu(
-                        expanded = expandedOfPersonal,
-                        onDismissRequest = { expandedOfPersonal = false }
-                    ) {
-                        personalityList.forEachIndexed { index, title ->
-                            DropdownMenuItem(
-                                text = { Text(text = title) },
-                                onClick = {
-                                    selectedIndexOfPersonal = index
-                                    expandedOfPersonal = false // 선택 후 메뉴 닫기
-                                }
-                            )
-                        }
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "성격",
+                        color = YeonTextMuted,
+                        fontFamily = font_nanum_gyuri,
+                        fontSize = 32.sp,
+                    )
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
                 }
+                DropdownSelectorField(
+                    value = selectedPersonality ?: "",
+                    expanded = expandedOfPersonal,
+                    onExpandedChange = { expandedOfPersonal = it },
+                    items = personalityList,
+                    onItemSelected = { selected ->
+                        selectedPersonality = selected
+                    }
+                )
             }
             //성격에 대한 상세 설명
             item {
@@ -336,12 +350,20 @@ fun AddPersonScreen(
             }
             //처음 만난 날
             item {
-                Text(
-                    text = "처음 만난 날",
-                    color = YeonTextMuted,
-                    fontFamily = font_nanum_gyuri,
-                    fontSize = 32.sp,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "처음 만난 날",
+                        color = YeonTextMuted,
+                        fontFamily = font_nanum_gyuri,
+                        fontSize = 32.sp,
+                    )
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
+                }
                 DateInputField(
                     text = "",
                     placeholder = "",
@@ -349,17 +371,25 @@ fun AddPersonScreen(
                 )
             }
             //처음 만난 곳
-            item{
-                Text(
-                    text = "처음 만난 곳",
-                    color = YeonTextMuted,
-                    fontFamily = font_nanum_gyuri,
-                    fontSize = 32.sp,
-                )
-                ExpandableTextField("", {}, "", "테스트P",)
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "처음 만난 곳",
+                        color = YeonTextMuted,
+                        fontFamily = font_nanum_gyuri,
+                        fontSize = 32.sp,
+                    )
+                    Text(
+                        text = "*",
+                        color = Color.Red
+                    )
+                }
+                ExpandableTextField("", {}, "", "테스트P")
             }
             //이 사람이 좋아 하는 것
-            item{
+            item {
                 Text(
                     text = "이 사람이 좋아 하는 것",
                     color = YeonTextMuted,
@@ -373,17 +403,17 @@ fun AddPersonScreen(
                 )
             }
             //좋아 하는 것에 대한 상세 설명
-            item{
+            item {
                 Text(
                     text = "좋아하는 것에 대한 상세 설명",
                     color = YeonTextMuted,
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P", )
+                ExpandableTextField("", {}, "", "테스트P")
             }
             //이 사람이 싫어 하는 것
-            item{
+            item {
                 Text(
                     text = "이 사람이 싫어 하는 것",
                     color = YeonTextMuted,
@@ -397,17 +427,17 @@ fun AddPersonScreen(
                 )
             }
             //싫어 하는 것에 대한 상세 설명
-            item{
+            item {
                 Text(
                     text = "싫어하는 것에 대한 상세 설명",
                     color = YeonTextMuted,
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P", )
+                ExpandableTextField("", {}, "", "테스트P")
             }
             //특징
-            item{
+            item {
                 Text(
                     text = "특징",
                     color = YeonTextMuted,
@@ -421,17 +451,17 @@ fun AddPersonScreen(
                 )
             }
             //특징에 대한 상세 설명
-            item{
+            item {
                 Text(
                     text = "특징에 대한 상세 설명",
                     color = YeonTextMuted,
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P", )
+                ExpandableTextField("", {}, "", "테스트P")
             }
             //마지막 연락 날짜
-            item{
+            item {
                 Text(
                     text = "마지막 연락 날짜",
                     color = YeonTextMuted,
@@ -445,27 +475,27 @@ fun AddPersonScreen(
                 )
             }
             //최근에 만난 곳
-            item{
+            item {
                 Text(
                     text = "최근에 만난 곳",
                     color = YeonTextMuted,
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P", )
+                ExpandableTextField("", {}, "", "테스트P")
             }
             //기억에 남는 최근 대화
-            item{
+            item {
                 Text(
                     text = "기억에 남는 최근 대화",
                     color = YeonTextMuted,
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P", )
+                ExpandableTextField("", {}, "", "테스트P")
             }
             //이사람과 함께한 사진
-            item{
+            item {
                 //현재는 디폴트 이미지뷰만 , 향 후 데이터 추가에 따라 해당 영역은 목록형으로 수정 예정
                 Text(
                     text = "이 사람과 함께한 사진",
@@ -473,14 +503,18 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                Image( painter = painterResource(id = R.drawable.sample_add_guide),
+                Image(
+                    painter = painterResource(id = R.drawable.sample_add_guide),
                     contentDescription = null,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), // 크기 지정
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp), // 크기 지정
                     contentScale = ContentScale.Crop,   // 비율 유지하며 꽉 채움
-                    alignment = Alignment.TopCenter)
+                    alignment = Alignment.TopCenter
+                )
             }
             //이사람이 사는 곳
-            item{
+            item {
                 //주소 입력폼 추후 제작 예정 , 일단은 상세입력폼으로 대체
                 Text(
                     text = "이 사람이 사는 곳",
@@ -488,10 +522,14 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P", )
+                AddressInputField(
+                    text = "",
+                    placeholder = "",
+                    onClick = {},
+                )
             }
             //개인 연락처
-            item{
+            item {
                 Text(
                     text = "개인 연락처",
                     color = YeonTextMuted,
@@ -499,10 +537,10 @@ fun AddPersonScreen(
                     fontSize = 32.sp,
                 )
                 //3등분 영역 InputField 고민 필요.
-                YeonOutlinedTextField("", {}, "", "", )
+                YeonOutlinedTextField("", {}, "", "")
             }
             //SNS 링크
-            item{
+            item {
                 //하이퍼 링크 첨부폼 추후 제작 예정 , 일단은 상세입력폼으로 대체
                 Text(
                     text = "SNS링크",
@@ -510,32 +548,36 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P", )
+                HyperlinkInputField(
+                    text = "",
+                    placeholder = "",
+                    onClick = {},
+                )
             }
             //직업
-            item{
+            item {
                 Text(
                     text = "직업",
                     color = YeonTextMuted,
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                YeonOutlinedTextField("", {}, "", "", )
+                YeonOutlinedTextField("", {}, "", "")
             }
             //기타메모
-            item{
+            item {
                 Text(
                     text = "기타 메모",
                     color = YeonTextMuted,
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P",)
+                ExpandableTextField("", {}, "", "테스트P")
             }
         }
         PrimaryButton(
             "인연 추가하기", {},
-                Modifier.padding(horizontal = 32.dp), true
+            Modifier.padding(horizontal = 32.dp), true
         )
     }
 }

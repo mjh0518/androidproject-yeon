@@ -29,41 +29,42 @@ fun ActionFieldContainer(
     icon: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true
-){
+) {
     Card(
-        modifier = modifier.width(600.dp).height(80.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(80.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(5.dp , YeonOutline),
+        border = BorderStroke(5.dp, YeonOutline),
         colors = CardDefaults.cardColors(
             containerColor = YeonSurface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        onClick = onClick,
+        enabled = enabled
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 24.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
-        ){
-            //text()
+        ) {
             Box(
                 modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.CenterStart
             ) {
-                if (text.isNullOrBlank()) {
+                if (text.isBlank()) {
                     Text(text = placeholder)
                 } else {
                     Text(text = text)
                 }
             }
-            //icon()
+
             Box(
-                modifier = Modifier.size(48.dp),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.width(56.dp),
+                contentAlignment = Alignment.CenterEnd
             ) {
-                IconButton(
-                    onClick = onClick
-                ) {
-                    icon()
-                }
+                icon()
             }
         }
     }

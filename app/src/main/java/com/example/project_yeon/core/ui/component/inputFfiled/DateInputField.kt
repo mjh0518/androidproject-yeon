@@ -21,19 +21,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.project_yeon.core.ui.theme.YeonOutline
-import com.example.project_yeon.core.ui.theme.YeonSurface
+import com.example.project_yeon.core.ui.etc.ActionFieldTrailingIcon
 
 @Composable
 fun DateInputField(
     text: String?,
     placeholder: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier.padding(top = 8.dp).padding(horizontal = 8.dp).height(60.dp),
+    modifier: Modifier = Modifier
+        .padding(top = 8.dp)
+        .padding(horizontal = 8.dp)
+        .height(60.dp),
     enabled: Boolean = true
 ) {
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxWidth()
     ) {
         ActionFieldContainer(
             text = text ?: "",
@@ -41,10 +43,9 @@ fun DateInputField(
             onClick = onClick,
             enabled = enabled,
             icon = {
-                Icon(
-                    modifier = Modifier.size(48.dp),
+                ActionFieldTrailingIcon(
                     imageVector = Icons.Default.DateRange,
-                    contentDescription = null
+                    contentDescription = "날짜 선택"
                 )
             }
         )
