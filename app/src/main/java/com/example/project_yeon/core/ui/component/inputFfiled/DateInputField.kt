@@ -4,9 +4,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,20 +26,15 @@ import com.example.project_yeon.core.ui.theme.YeonSurface
 
 @Composable
 fun DateInputField(
-    label: String,
     text: String?,
     placeholder: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.padding(top = 8.dp).padding(horizontal = 8.dp).height(60.dp),
     enabled: Boolean = true
 ) {
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxSize()
     ) {
-        Text(text = label)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         ActionFieldContainer(
             text = text ?: "",
             placeholder = placeholder,
@@ -45,6 +42,7 @@ fun DateInputField(
             enabled = enabled,
             icon = {
                 Icon(
+                    modifier = Modifier.size(48.dp),
                     imageVector = Icons.Default.DateRange,
                     contentDescription = null
                 )

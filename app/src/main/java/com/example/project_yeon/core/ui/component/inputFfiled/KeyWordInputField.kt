@@ -24,20 +24,15 @@ import com.example.project_yeon.core.ui.theme.YeonSurface
 
 @Composable
 fun KeywordInputField(
-    label: String,
     text: String?,
     placeholder: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.padding(top = 8.dp).padding(horizontal = 8.dp).height(60.dp),
     enabled: Boolean = true
 ) {
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
-        Text(text = label)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         ActionFieldContainer(
             text = text ?: "",
             placeholder = placeholder,

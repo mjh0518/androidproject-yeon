@@ -34,7 +34,7 @@ fun ExpandableTextField(
     onValueChange: (String) -> Unit,
     label: String,
     placeholder: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.padding(top = 8.dp).padding(horizontal = 8.dp).height(60.dp),
     expandedMinHeight: Dp = 160.dp
 ) {
     var isFocused by remember { mutableStateOf(false) }

@@ -56,7 +56,7 @@ fun ActionFieldContainer(
             }
             //icon()
             Box(
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(48.dp),
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(

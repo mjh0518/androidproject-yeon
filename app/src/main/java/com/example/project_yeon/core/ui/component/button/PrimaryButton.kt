@@ -22,7 +22,6 @@ fun PrimaryButton(
 ){
     val font_nanum_gyuri= FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
 
-
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
