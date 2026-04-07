@@ -1,5 +1,6 @@
 package com.example.project_yeon.feature.person.add
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.project_yeon.domain.person.repository.PersonRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class AddPersonViewModel (
+class AddPersonViewModel(
     //private val repo : PersonRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddPersonUiState())
@@ -24,6 +25,7 @@ class AddPersonViewModel (
                     )
                 }
             }
+
             is AddPersonEvent.GenderChanged -> {
                 _uiState.update {
                     it.copy(
@@ -33,6 +35,7 @@ class AddPersonViewModel (
                     )
                 }
             }
+
             is AddPersonEvent.BirthDateChanged -> {
                 _uiState.update {
                     it.copy(
@@ -42,6 +45,7 @@ class AddPersonViewModel (
                     )
                 }
             }
+
             is AddPersonEvent.IntimacyChanged -> {
                 _uiState.update {
                     it.copy(
@@ -51,6 +55,7 @@ class AddPersonViewModel (
                     )
                 }
             }
+
             is AddPersonEvent.MbtiChanged -> {
                 _uiState.update {
                     it.copy(
@@ -60,6 +65,7 @@ class AddPersonViewModel (
                     )
                 }
             }
+
             is AddPersonEvent.PersonalityChanged -> {
                 _uiState.update {
                     it.copy(
@@ -69,6 +75,7 @@ class AddPersonViewModel (
                     )
                 }
             }
+
             is AddPersonEvent.FirstMetDateChanged -> {
                 _uiState.update {
                     it.copy(
@@ -78,6 +85,7 @@ class AddPersonViewModel (
                     )
                 }
             }
+
             is AddPersonEvent.FirstMetPlaceChanged -> {
                 _uiState.update {
                     it.copy(
@@ -87,8 +95,26 @@ class AddPersonViewModel (
                     )
                 }
             }
+
+            is AddPersonEvent.SaveClicked -> {
+                val core = _uiState.value.coreInfo
+
+                val isValid =
+                    core.name.isNotBlank() &&
+                            core.gender != null &&
+                            core.birthDate != null &&
+                            core.mbti.isNotBlank() &&
+                            core.personality.isNotBlank() &&
+                            core.firstMetDate != null &&
+                            core.firstMetPlace.isNotBlank()
+
+                if (isValid) {
+                    Log.d("AddPersonViewModel", "Save validation success")
+                } else {
+                    Log.d("AddPersonViewModel", "Save validation fail")
+                }
+
+            }
         }
-
     }
-
 }

@@ -585,7 +585,9 @@ fun AddPersonScreen(
             }
         }
         PrimaryButton(
-            "인연 추가하기", {},
+            "인연 추가하기", {
+                viewModel.onEvent(AddPersonEvent.SaveClicked)
+            },
             Modifier.padding(horizontal = 32.dp), uiState.canSubmit
         )
     }

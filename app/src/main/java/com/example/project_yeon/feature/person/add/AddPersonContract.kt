@@ -49,6 +49,7 @@ sealed interface AddPersonEvent {
     data class FirstMetDateChanged(val value: String) : AddPersonEvent
     data class FirstMetPlaceChanged(val value: String) : AddPersonEvent
 
+    data object SaveClicked : AddPersonEvent
 
     /*sealed interface CoreInfo : AddPersonEvent {
         data class NameChanged(val value: String) : CoreInfo
