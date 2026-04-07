@@ -27,7 +27,7 @@ fun YeonOutlinedTextField(
 ){
     TextField(
         value = value,
-        onValueChange = { onValueChange },
+        onValueChange = { newvalue -> onValueChange(newvalue) },
         label = { Text(label) },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,

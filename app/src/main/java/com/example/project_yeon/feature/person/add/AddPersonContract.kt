@@ -11,19 +11,46 @@ data class AddPersonUiState(
     val isDirty: Boolean = false,
     val isSaving: Boolean = false
 )*/
+
+enum class Gender {
+    MALE, FEMALE
+}
+
 data class AddPersonCoreInfoState(
     val name: String = "",
-    val gender: Int? = null,
-    val birthDate: LocalDate? = null,
-    val intimacy: Int = 0,
-    val mbti: String? = null,
-    val personality: String? = null,
-    val personalityDescription: String = "",
-    val profileImageUri: String? = null
+    val gender: Gender? = Gender.MALE,
+    val birthDate: String? = "",
+    val intimacy: Int = 1,
+    val mbti: String = "",
+    val personality: String = "",
+    val firstMetDate: String? = "",
+    val firstMetPlace: String = ""
 )
+data class AddPersonUiState(
+    val coreInfo: AddPersonCoreInfoState = AddPersonCoreInfoState(),
+){
+    val canSubmit: Boolean
+        get() = coreInfo.name.isNotBlank() &&
+        coreInfo.gender != null &&
+        coreInfo.birthDate != null &&
+        coreInfo.mbti.isNotBlank() &&
+        coreInfo.personality.isNotBlank() &&
+        coreInfo.firstMetDate != null &&
+        coreInfo.firstMetPlace.isNotBlank()
+}
 
 sealed interface AddPersonEvent {
-    sealed interface CoreInfo : AddPersonEvent {
+    data class NameChanged(val value: String) : AddPersonEvent
+    data class GenderChanged(val value: Gender) : AddPersonEvent
+    data class BirthDateChanged(val value: String) : AddPersonEvent
+    data class IntimacyChanged(val value: Int) : AddPersonEvent
+    data class MbtiChanged(val value: String) : AddPersonEvent
+    data class PersonalityChanged(val value: String) : AddPersonEvent
+    data class FirstMetDateChanged(val value: String) : AddPersonEvent
+    data class FirstMetPlaceChanged(val value: String) : AddPersonEvent
+
+
+    /*sealed interface CoreInfo : AddPersonEvent {
         data class NameChanged(val value: String) : CoreInfo
         data class GenderChanged(val value: Int) : CoreInfo
         data class BirthDateChanged(val value: LocalDate) : CoreInfo
@@ -46,7 +73,7 @@ sealed interface AddPersonEvent {
 
     data object SaveClicked : AddPersonEvent
     data object BackClicked : AddPersonEvent
-    data object ConfirmDiscardClicked : AddPersonEvent
+    data object ConfirmDiscardClicked : AddPersonEvent*/
 }
 
 sealed interface AddPersonEffect {

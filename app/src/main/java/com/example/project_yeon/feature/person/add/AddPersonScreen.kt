@@ -16,12 +16,15 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,14 +57,18 @@ import com.example.project_yeon.core.ui.etc.DropdownSelectorField
 import com.example.project_yeon.core.ui.etc.RatingBar
 import com.example.project_yeon.core.ui.theme.YeonTextMuted
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
+import androidx.lifecycle.viewmodel.compose.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPersonScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    viewModel: AddPersonViewModel = viewModel()
 ) {
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
-    val genderOptions = listOf("남", "여")
+
+    val uiState by viewModel.uiState.collectAsState()
 
     val mbtiList = listOf(
         "ISTJ", "ISFJ", "INFJ", "INTJ",
@@ -79,11 +86,9 @@ fun AddPersonScreen(
     )
 
     var expandedOfMbti by remember { mutableStateOf(false) }
-    var selectedIndexOfMbti by remember { mutableStateOf(0) }
     var expandedOfPersonal by remember { mutableStateOf(false) }
-    var selectedIndexOfPersonal by remember { mutableStateOf(0) }
-    var selectedMbti by rememberSaveable { mutableStateOf("") }
-    var selectedPersonality by rememberSaveable { mutableStateOf("") }
+    val datePickerState = rememberDatePickerState()
+    var showDialog by remember { mutableStateOf(false) }
 
 
     var temp = ""
@@ -188,7 +193,7 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                YeonOutlinedTextField("", {}, "", "")
+                YeonOutlinedTextField(uiState.coreInfo.name, {viewModel.onEvent(AddPersonEvent.NameChanged(it))}, "", "")
             }
             //성별
             item {
@@ -215,8 +220,8 @@ fun AddPersonScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = (temp == ""),
-                            onClick = { },
+                            selected = (uiState.coreInfo.gender == Gender.MALE),
+                            onClick = { viewModel.onEvent(AddPersonEvent.GenderChanged(Gender.MALE))},
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = Color.Blue,
                             )
@@ -235,8 +240,8 @@ fun AddPersonScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = (temp == ""),
-                            onClick = { },
+                            selected = (uiState.coreInfo.gender == Gender.FEMALE),
+                            onClick = { viewModel.onEvent(AddPersonEvent.GenderChanged(Gender.FEMALE))},
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = Color.Red,
                             )
@@ -266,7 +271,8 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                YeonOutlinedTextField("", {}, "", "")
+                YeonOutlinedTextField(uiState.coreInfo.birthDate.toString(), {viewModel.onEvent(
+                    AddPersonEvent.BirthDateChanged(it))}, "", "")
             }
             //친밀도
             item {
@@ -284,7 +290,7 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                RatingBar(0, onRatingChanged = {})
+                RatingBar(uiState.coreInfo.intimacy, onRatingChanged = { viewModel.onEvent(AddPersonEvent.IntimacyChanged(it))})
             }
             //MBTI
             item {
@@ -303,12 +309,12 @@ fun AddPersonScreen(
                     )
                 }
                 DropdownSelectorField(
-                    value = selectedMbti ?: "",
+                    value = uiState.coreInfo.mbti,
                     expanded = expandedOfMbti,
                     onExpandedChange = { expandedOfMbti = it },
                     items = mbtiList,
                     onItemSelected = { selected ->
-                        selectedMbti = selected
+                        viewModel.onEvent(AddPersonEvent.MbtiChanged(selected))
                     }
                 )
             }
@@ -329,12 +335,12 @@ fun AddPersonScreen(
                     )
                 }
                 DropdownSelectorField(
-                    value = selectedPersonality ?: "",
+                    value = uiState.coreInfo.personality,
                     expanded = expandedOfPersonal,
                     onExpandedChange = { expandedOfPersonal = it },
                     items = personalityList,
                     onItemSelected = { selected ->
-                        selectedPersonality = selected
+                        viewModel.onEvent(AddPersonEvent.PersonalityChanged(selected))
                     }
                 )
             }
@@ -364,11 +370,14 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
+                YeonOutlinedTextField(uiState.coreInfo.firstMetDate.toString(), {viewModel.onEvent(
+                    AddPersonEvent.FirstMetDateChanged(it))}, "", "")
+                /* 처음 만난 곳 DateInputField -> Date Picker로 구현이 완료되면 다시 컴포넌트 사용 예정.
                 DateInputField(
-                    text = "",
+                    text = uiState.coreInfo.firstMetDate,
                     placeholder = "",
-                    onClick = {},
-                )
+                    onClick = {/* 캘린더 띄우기 후 체인지 */},
+                )*/
             }
             //처음 만난 곳
             item {
@@ -386,7 +395,7 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                ExpandableTextField("", {}, "", "테스트P")
+                ExpandableTextField(uiState.coreInfo.firstMetPlace, {viewModel.onEvent(AddPersonEvent.FirstMetPlaceChanged(it))}, "", "")
             }
             //이 사람이 좋아 하는 것
             item {
@@ -577,7 +586,7 @@ fun AddPersonScreen(
         }
         PrimaryButton(
             "인연 추가하기", {},
-            Modifier.padding(horizontal = 32.dp), true
+            Modifier.padding(horizontal = 32.dp), uiState.canSubmit
         )
     }
 }

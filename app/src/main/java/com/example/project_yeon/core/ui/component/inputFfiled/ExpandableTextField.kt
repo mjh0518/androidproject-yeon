@@ -51,7 +51,7 @@ fun ExpandableTextField(
     ) {
         TextField(
             value = value, // 현재 텍스트 값
-            onValueChange = { onValueChange }, // 텍스트 변경 시 상태 업데이트
+            onValueChange = { newvalue -> onValueChange(newvalue) }, // 텍스트 변경 시 상태 업데이트
             label = { Text(label) }, // 라벨 추가
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
