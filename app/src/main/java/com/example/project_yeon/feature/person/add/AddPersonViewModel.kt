@@ -52,12 +52,13 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.BirthDateChanged -> {
-                _uiState.update {
-                    it.copy(
-                        coreInfo = it.coreInfo.copy(
+            is AddPersonEvent.CoreInfo.BirthDateChanged -> {
+                updateState { currentState ->
+                    currentState.copy(
+                        coreInfo = currentState.coreInfo.copy(
                             birthDate = event.value
-                        )
+                        ),
+                        //isDirty = true
                     )
                 }
             }
@@ -164,4 +165,5 @@ class AddPersonViewModel(
     private fun updateState(transform: (AddPersonUiState) -> AddPersonUiState) {
         _uiState.value = transform(_uiState.value)
     }
+
 }

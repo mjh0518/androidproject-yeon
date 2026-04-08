@@ -22,7 +22,7 @@ data class AddPersonCoreInfoState(
     val profileImageUri : ProfileImageState = ProfileImageState.Default,
     val name: String = "",
     val gender: Gender? = null,
-    val birthDate: String = "",
+    val birthDate: LocalDate? = null,
     val intimacy: Int = 1,
     val mbti: String = "",
     val personality: String = "",
@@ -68,10 +68,10 @@ data class AddPersonUiState(
 sealed interface AddPersonEvent {
     sealed interface CoreInfo : AddPersonEvent {
         data class ProfileImageChanged(val image: ProfileImageState) : CoreInfo
+        data class BirthDateChanged(val value: LocalDate) : CoreInfo
     }
     data class NameChanged(val value: String) : AddPersonEvent
     data class GenderChanged(val value: Gender) : AddPersonEvent
-    data class BirthDateChanged(val value: String) : AddPersonEvent
     data class IntimacyChanged(val value: Int) : AddPersonEvent
     data class MbtiChanged(val value: String) : AddPersonEvent
     data class PersonalityChanged(val value: String) : AddPersonEvent

@@ -42,7 +42,7 @@ fun PersonCreateRequest.toEntity(
     return PersonEntity(
         name = name,
         gender = gender,
-        birthDate = birthDate,
+        birthDate = birthDate.toString(),
         closeness = closeness,
         mbti = mbti,
         personality = personality,

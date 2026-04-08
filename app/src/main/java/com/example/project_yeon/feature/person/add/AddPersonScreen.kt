@@ -15,28 +15,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +36,6 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -53,7 +44,6 @@ import androidx.compose.ui.unit.sp
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.component.button.PrimaryButton
 import com.example.project_yeon.core.ui.component.button.SecondaryButton
-import com.example.project_yeon.core.ui.component.inputFfiled.AddressInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.DateInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.ExpandableTextField
 import com.example.project_yeon.core.ui.component.inputFfiled.HyperlinkInputField
@@ -65,7 +55,9 @@ import com.example.project_yeon.core.ui.theme.YeonTextMuted
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
 import androidx.lifecycle.viewmodel.compose.*
 import coil.compose.AsyncImage
-import com.example.project_yeon.core.ui.etc.ChoiceProfilePhotoDialog
+import com.example.project_yeon.core.ui.component.dialog.BirthDatePickerDialog
+import com.example.project_yeon.core.ui.component.inputFfiled.BirthDateField
+import com.example.project_yeon.core.ui.component.dialog.ChoiceProfilePhotoDialog
 import com.example.project_yeon.core.ui.etc.MemoryImageSectionContainer
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
 
@@ -98,7 +90,7 @@ fun AddPersonScreen(
 
     var expandedOfMbti by remember { mutableStateOf(false) }
     var expandedOfPersonal by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
+    var showBirthDatePicker by rememberSaveable { mutableStateOf(false) }
     var showChoiceProfileDialog by remember { mutableStateOf(false) }
 
     // 프로필 사진 전용 Picker(단일 사진)
@@ -338,8 +330,22 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                YeonOutlinedTextField(uiState.coreInfo.birthDate.toString(), {viewModel.onEvent(
-                    AddPersonEvent.BirthDateChanged(it))}, "", "")
+                BirthDateField(
+                    birthDate = uiState.coreInfo.birthDate,
+                    onClick = {showBirthDatePicker = true}
+                )
+                if(showBirthDatePicker){
+                    BirthDatePickerDialog(
+                        initialDate = uiState.coreInfo.birthDate,
+                        onDismiss = { showBirthDatePicker = false },
+                        onConfirm = { selectedDate ->
+                            viewModel.onEvent(
+                                AddPersonEvent.CoreInfo.BirthDateChanged(selectedDate)
+                            )
+                            showBirthDatePicker = false
+                        }
+                    )
+                }
             }
             //친밀도
             item {

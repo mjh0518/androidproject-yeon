@@ -3,7 +3,7 @@ package com.example.project_yeon.domain.person.model
 data class PersonCreateRequest(
     val name: String,
     val gender: String,
-    val birthDate: String,
+    val birthDate: String?,
     val closeness: Int,
     val mbti: String,
     val personality: String,
