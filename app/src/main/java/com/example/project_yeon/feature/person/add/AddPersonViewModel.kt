@@ -1,12 +1,15 @@
 package com.example.project_yeon.feature.person.add
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import com.example.project_yeon.domain.person.repository.PersonRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.nio.file.Files.copy
 
 class AddPersonViewModel(
     //private val repo : PersonRepository
@@ -14,8 +17,21 @@ class AddPersonViewModel(
     private val _uiState = MutableStateFlow(AddPersonUiState())
     val uiState: StateFlow<AddPersonUiState> = _uiState.asStateFlow()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun onEvent(event: AddPersonEvent) {
         when (event) {
+
+            is AddPersonEvent.CoreInfo.ProfileImageChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        coreInfo = currentState.coreInfo.copy(
+                            profileImageUri = event.image
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
             is AddPersonEvent.NameChanged -> {
                 _uiState.update {
                     it.copy(
@@ -96,6 +112,34 @@ class AddPersonViewModel(
                 }
             }
 
+            is AddPersonEvent.AdditionalInfo.MemoryImagesAdded -> {
+                updateState { currentState ->
+                    val merged = (
+                            currentState.additionalInfo.memoryImageUris + event.uris
+                            ).distinct()
+
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            memoryImageUris = merged
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.AdditionalInfo.MemoryImageRemoved -> {
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            memoryImageUris = currentState.additionalInfo.memoryImageUris
+                                .filterNot { it == event.uri }
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+
             is AddPersonEvent.SaveClicked -> {
                 val core = _uiState.value.coreInfo
 
@@ -116,5 +160,8 @@ class AddPersonViewModel(
 
             }
         }
+    }
+    private fun updateState(transform: (AddPersonUiState) -> AddPersonUiState) {
+        _uiState.value = transform(_uiState.value)
     }
 }

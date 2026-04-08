@@ -47,6 +47,7 @@ dependencies {
     val lifecycle_version = "2.10.0"
     val arch_version = "2.2.0"
 
+    implementation("io.coil-kt:coil-compose:2.7.0") // 최신 버전 사용
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-runtime:${room_version}")
     implementation("androidx.navigation:navigation-compose:$nav_version")

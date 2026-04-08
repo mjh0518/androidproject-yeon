@@ -1,5 +1,11 @@
 package com.example.project_yeon.feature.person.add
 
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,7 +64,12 @@ import com.example.project_yeon.core.ui.etc.RatingBar
 import com.example.project_yeon.core.ui.theme.YeonTextMuted
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
 import androidx.lifecycle.viewmodel.compose.*
+import coil.compose.AsyncImage
+import com.example.project_yeon.core.ui.etc.ChoiceProfilePhotoDialog
+import com.example.project_yeon.core.ui.etc.MemoryImageSectionContainer
+import com.example.project_yeon.feature.person.add.model.ProfileImageState
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPersonScreen(
@@ -88,10 +99,34 @@ fun AddPersonScreen(
     var expandedOfMbti by remember { mutableStateOf(false) }
     var expandedOfPersonal by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
-    var showDialog by remember { mutableStateOf(false) }
+    var showChoiceProfileDialog by remember { mutableStateOf(false) }
 
+    // 프로필 사진 전용 Picker(단일 사진)
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        // 결과를 ViewModel로 올림 → 미리보기 표시
+        if (uri != null) {
+            viewModel.onEvent(
+                AddPersonEvent.CoreInfo.ProfileImageChanged(
+                    ProfileImageState.Custom(uri.toString())
+                )
+            )
+        }
+    }
 
-    var temp = ""
+    //함께한 사진 전용 Picker(다중)
+    val memoryPhotoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 20)
+    ) { uris: List<Uri> ->
+        if (uris.isNotEmpty()) {
+            viewModel.onEvent(
+                AddPersonEvent.AdditionalInfo.MemoryImagesAdded(
+                    uris.map { it.toString() }
+                )
+            )
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -128,12 +163,12 @@ fun AddPersonScreen(
                 .fillMaxSize()
                 .weight(6f)
         ) {
-            // 프로필 사진 : 일단은 이미지뷰와 이벤트 없는 아이콘 버튼으로 대체 , 향후 구현에 따라 변화하는 이미지뷰로 변경
+            //프로필 사진
             item {
                 Box(
                     modifier = Modifier
-                        .width(120.dp)
-                        .height(120.dp)
+                        .width(256.dp)
+                        .height(256.dp)
                         .padding(12.dp)
                 ) {
                     Box(
@@ -147,16 +182,30 @@ fun AddPersonScreen(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "프로필 이미지",
-                            modifier = Modifier.size(48.dp),
-                            tint = Color.DarkGray
-                        )
+                        when (val imageState = uiState.coreInfo.profileImageUri) {
+                            ProfileImageState.Default -> {
+                                Image(
+                                    painter = painterResource(R.drawable.profile_default),
+                                    contentDescription = "프로필 이미지",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                            is ProfileImageState.Custom -> {
+                                AsyncImage(
+                                    model = imageState.uri,
+                                    contentDescription = "프로필 썸네일",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
                     }
 
                     IconButton(
-                        onClick = { },
+                        onClick = {
+                            showChoiceProfileDialog = true
+                        },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .size(36.dp)
@@ -175,6 +224,24 @@ fun AddPersonScreen(
                             tint = Color.DarkGray
                         )
                     }
+                    ChoiceProfilePhotoDialog(
+                        showDialog = showChoiceProfileDialog,
+                        onSelectDefaultImage = {
+                            viewModel.onEvent(
+                                AddPersonEvent.CoreInfo.ProfileImageChanged(
+                                    ProfileImageState.Default
+                                )
+                            )
+                        },
+                        onSelectGalleryImage = {
+                            photoPicker.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        },
+                        onDismiss = {showChoiceProfileDialog = false}
+                    )
                 }
             }
             //이름
@@ -372,12 +439,7 @@ fun AddPersonScreen(
                 }
                 YeonOutlinedTextField(uiState.coreInfo.firstMetDate.toString(), {viewModel.onEvent(
                     AddPersonEvent.FirstMetDateChanged(it))}, "", "")
-                /* 처음 만난 곳 DateInputField -> Date Picker로 구현이 완료되면 다시 컴포넌트 사용 예정.
-                DateInputField(
-                    text = uiState.coreInfo.firstMetDate,
-                    placeholder = "",
-                    onClick = {/* 캘린더 띄우기 후 체인지 */},
-                )*/
+
             }
             //처음 만난 곳
             item {
@@ -395,7 +457,7 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                ExpandableTextField(uiState.coreInfo.firstMetPlace, {viewModel.onEvent(AddPersonEvent.FirstMetPlaceChanged(it))}, "", "")
+                YeonOutlinedTextField(uiState.coreInfo.name, {viewModel.onEvent(AddPersonEvent.NameChanged(it))}, "", "")
             }
             //이 사람이 좋아 하는 것
             item {
@@ -512,14 +574,19 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                Image(
-                    painter = painterResource(id = R.drawable.sample_add_guide),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp), // 크기 지정
-                    contentScale = ContentScale.Crop,   // 비율 유지하며 꽉 채움
-                    alignment = Alignment.TopCenter
+
+                MemoryImageSectionContainer(
+                    imageUris = uiState.additionalInfo.memoryImageUris,
+                    onAddImagesClick = {
+                        memoryPhotoPicker.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
+                        )
+                    },
+                    onRemoveImageClick = {
+                        viewModel.onEvent(AddPersonEvent.AdditionalInfo.MemoryImageRemoved(it))
+                    }
                 )
             }
             //이사람이 사는 곳
@@ -531,11 +598,7 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                AddressInputField(
-                    text = "",
-                    placeholder = "",
-                    onClick = {},
-                )
+                YeonOutlinedTextField(uiState.coreInfo.name, {viewModel.onEvent(AddPersonEvent.NameChanged(it))}, "", "")
             }
             //개인 연락처
             item {
