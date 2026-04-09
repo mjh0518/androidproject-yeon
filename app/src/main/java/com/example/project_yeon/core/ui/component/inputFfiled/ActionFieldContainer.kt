@@ -17,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.project_yeon.core.ui.theme.YeonOutline
 import com.example.project_yeon.core.ui.theme.YeonSurface
@@ -33,7 +35,7 @@ fun ActionFieldContainer(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(80.dp),
+            .height(60.dp),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(5.dp, YeonOutline),
         colors = CardDefaults.cardColors(
@@ -54,9 +56,9 @@ fun ActionFieldContainer(
                 contentAlignment = Alignment.CenterStart
             ) {
                 if (text.isBlank()) {
-                    Text(text = placeholder)
+                    Text(text = placeholder, style = TextStyle(textAlign = TextAlign.Center),)
                 } else {
-                    Text(text = text)
+                    Text(text = text , style = TextStyle(textAlign = TextAlign.Center),)
                 }
             }
 

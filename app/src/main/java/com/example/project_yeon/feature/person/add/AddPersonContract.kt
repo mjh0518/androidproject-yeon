@@ -30,6 +30,7 @@ data class AddPersonCoreInfoState(
     val firstMetPlace: String = ""
 )
 data class AddPersonAdditionalInfoState(
+    val personalityDescription: String = "",
     val likes: List<String> = emptyList(),
     val likesDescription : String = "",
     val dislikes: List<String> = emptyList(),
@@ -39,15 +40,16 @@ data class AddPersonAdditionalInfoState(
     val lastContactDateText: String = "",
     val recentMetPlace: String = "",
     val memorableConversationTalk: String = "",
-    val memoryImageUris: List<String> = emptyList()
+    val memoryImageUris: List<String> = emptyList(),
+    val job: String = "",
+    val memo: String = ""
 )
 
 data class AddPersonContractInfoState(
     val livingArea: String = "",
     val phoneNumber: String = "",
     val snsLink: String = "",
-    val job: String = "",
-    val memo: String = ""
+
 )
 
 data class AddPersonUiState(
@@ -70,6 +72,7 @@ sealed interface AddPersonEvent {
         data class ProfileImageChanged(val image: ProfileImageState) : CoreInfo
         data class BirthDateChanged(val value: LocalDate) : CoreInfo
     }
+    //CoreInfo Event
     data class NameChanged(val value: String) : AddPersonEvent
     data class GenderChanged(val value: Gender) : AddPersonEvent
     data class IntimacyChanged(val value: Int) : AddPersonEvent
@@ -78,10 +81,32 @@ sealed interface AddPersonEvent {
     data class FirstMetDateChanged(val value: String) : AddPersonEvent
     data class FirstMetPlaceChanged(val value: String) : AddPersonEvent
 
+
+    //Addi~Contact Info Chagned
+
+    data class LikesChanged(val value: List<String>) : AddPersonEvent
+    data class LikesDescriptionChanged(val value: String) : AddPersonEvent
+    data class DislikesChanged(val value: List<String>) : AddPersonEvent
+    data class DislikesDescriptionChanged(val value: String) : AddPersonEvent
+    data class TraitsChanged(val value: List<String>) : AddPersonEvent
+    data class TraitsDescriptionChanged(val value: String) : AddPersonEvent
+    data class PersonalityDescriptionChanged(val value: String) : AddPersonEvent
+    data class LastContactDateChanged(val value: String) : AddPersonEvent
+    data class LastRecentMetPlaceChanged(val value : String) : AddPersonEvent
+    data class MemorableConversationTalkChanged(val value : String) : AddPersonEvent
+
     sealed interface AdditionalInfo : AddPersonEvent {
         data class MemoryImagesAdded(val uris: List<String>) : AdditionalInfo
         data class MemoryImageRemoved(val uri: String) : AdditionalInfo
     }
+    data class LivingAreaChanged(val value: String) : AddPersonEvent
+    data class PhoneNumberChanged(val value : String) : AddPersonEvent
+    sealed interface ContactInfo : AddPersonEvent {
+        data class SnsLinkChanged(val value: String) : ContactInfo
+    }
+    data class JobChanged(val value: String) : AddPersonEvent
+    data class MemoChanged(val value: String) : AddPersonEvent
+
     data object SaveClicked : AddPersonEvent
 
     /* data object BackClicked : AddPersonEvent

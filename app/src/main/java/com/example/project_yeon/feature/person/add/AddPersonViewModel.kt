@@ -93,6 +93,17 @@ class AddPersonViewModel(
                 }
             }
 
+            is AddPersonEvent.PersonalityDescriptionChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            personalityDescription = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
             is AddPersonEvent.FirstMetDateChanged -> {
                 _uiState.update {
                     it.copy(
@@ -109,6 +120,104 @@ class AddPersonViewModel(
                         coreInfo = it.coreInfo.copy(
                             firstMetPlace = event.value
                         )
+                    )
+                }
+            }
+
+            is AddPersonEvent.LikesChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            likes = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+            is AddPersonEvent.LikesDescriptionChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            likesDescription = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.DislikesChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            dislikes = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+            is AddPersonEvent.DislikesDescriptionChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            dislikesDescription = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.TraitsChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            traits = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+            is AddPersonEvent.TraitsDescriptionChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            traitsDescription = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+
+
+            is AddPersonEvent.LastContactDateChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            lastContactDateText = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.LastRecentMetPlaceChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            recentMetPlace = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.MemorableConversationTalkChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            memorableConversationTalk = event.value
+                        ),
+                        //isDirty = true
                     )
                 }
             }
@@ -140,6 +249,60 @@ class AddPersonViewModel(
                 }
             }
 
+            is AddPersonEvent.LivingAreaChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        contactInfo = currentState.contactInfo.copy(
+                            livingArea = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.PhoneNumberChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        contactInfo = currentState.contactInfo.copy(
+                            phoneNumber = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.ContactInfo.SnsLinkChanged -> {
+                updateState { currentState ->
+                    currentState.copy(
+                        contactInfo = currentState.contactInfo.copy(
+                            snsLink = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.JobChanged->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
+                            job = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
+
+            is AddPersonEvent.MemoChanged ->{
+                updateState { currentState ->
+                    currentState.copy(
+                        additionalInfo = currentState. additionalInfo.copy(
+                            memo = event.value
+                        ),
+                        //isDirty = true
+                    )
+                }
+            }
 
             is AddPersonEvent.SaveClicked -> {
                 val core = _uiState.value.coreInfo

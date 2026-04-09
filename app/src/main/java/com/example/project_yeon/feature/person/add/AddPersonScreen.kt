@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,7 +48,6 @@ import com.example.project_yeon.core.ui.component.button.PrimaryButton
 import com.example.project_yeon.core.ui.component.button.SecondaryButton
 import com.example.project_yeon.core.ui.component.inputFfiled.DateInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.ExpandableTextField
-import com.example.project_yeon.core.ui.component.inputFfiled.HyperlinkInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.KeywordInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.YeonOutlinedTextField
 import com.example.project_yeon.core.ui.etc.DropdownSelectorField
@@ -58,6 +59,10 @@ import coil.compose.AsyncImage
 import com.example.project_yeon.core.ui.component.dialog.BirthDatePickerDialog
 import com.example.project_yeon.core.ui.component.inputFfiled.BirthDateField
 import com.example.project_yeon.core.ui.component.dialog.ChoiceProfilePhotoDialog
+import com.example.project_yeon.core.ui.component.dialog.KeywordInputDialog
+import com.example.project_yeon.core.ui.component.dialog.SnsLinkInputDialog
+import com.example.project_yeon.core.ui.component.inputFfiled.ActionFieldContainer
+import com.example.project_yeon.core.ui.etc.ActionFieldTrailingIcon
 import com.example.project_yeon.core.ui.etc.MemoryImageSectionContainer
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
 
@@ -92,6 +97,10 @@ fun AddPersonScreen(
     var expandedOfPersonal by remember { mutableStateOf(false) }
     var showBirthDatePicker by rememberSaveable { mutableStateOf(false) }
     var showChoiceProfileDialog by remember { mutableStateOf(false) }
+    var showLikesDialog by rememberSaveable { mutableStateOf(false) }
+    var showDisLikesDialog by rememberSaveable { mutableStateOf(false) }
+    var showTraitsDialog by rememberSaveable { mutableStateOf(false) }
+    var showSnsDialog by remember{mutableStateOf(false)}
 
     // 프로필 사진 전용 Picker(단일 사진)
     val photoPicker = rememberLauncherForActivityResult(
@@ -252,7 +261,7 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                YeonOutlinedTextField(uiState.coreInfo.name, {viewModel.onEvent(AddPersonEvent.NameChanged(it))}, "", "")
+                YeonOutlinedTextField(uiState.coreInfo.name, {viewModel.onEvent(AddPersonEvent.NameChanged(it))}, "",)
             }
             //성별
             item {
@@ -425,7 +434,8 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P")
+                ExpandableTextField(uiState.additionalInfo.personalityDescription, {viewModel.onEvent(
+                    AddPersonEvent.PersonalityDescriptionChanged(it))}, "", "")
             }
             //처음 만난 날
             item {
@@ -443,8 +453,8 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                YeonOutlinedTextField(uiState.coreInfo.firstMetDate.toString(), {viewModel.onEvent(
-                    AddPersonEvent.FirstMetDateChanged(it))}, "", "")
+                YeonOutlinedTextField(uiState.coreInfo.firstMetDate, {viewModel.onEvent(
+                    AddPersonEvent.FirstMetDateChanged(it))}, "",)
 
             }
             //처음 만난 곳
@@ -463,7 +473,7 @@ fun AddPersonScreen(
                         color = Color.Red
                     )
                 }
-                YeonOutlinedTextField(uiState.coreInfo.name, {viewModel.onEvent(AddPersonEvent.NameChanged(it))}, "", "")
+                YeonOutlinedTextField(uiState.coreInfo.firstMetPlace, {viewModel.onEvent(AddPersonEvent.FirstMetPlaceChanged(it))}, "", )
             }
             //이 사람이 좋아 하는 것
             item {
@@ -473,10 +483,30 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                KeywordInputField(
-                    text = "",
+                ActionFieldContainer(
+                    text = uiState.additionalInfo.likes.joinToString(" ") { "#$it" },
                     placeholder = "",
-                    onClick = {},
+                    onClick = { showLikesDialog = true },
+                    icon = {
+                        ActionFieldTrailingIcon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "좋아하는 것 추가"
+                        )
+                    }
+                )
+
+                KeywordInputDialog(
+                    showDialog = showLikesDialog,
+                    title = "좋아하는 것 추가",
+                    initialKeywords = uiState.additionalInfo.likes,
+                    onConfirm = { keywords ->
+                        viewModel.onEvent(
+                            AddPersonEvent.LikesChanged(keywords)
+                        )
+                    },
+                    onDismiss = {
+                        showLikesDialog = false
+                    }
                 )
             }
             //좋아 하는 것에 대한 상세 설명
@@ -487,7 +517,8 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P")
+                ExpandableTextField(uiState.additionalInfo.likesDescription, {viewModel.onEvent(
+                    AddPersonEvent.LikesDescriptionChanged(it))}, "", "")
             }
             //이 사람이 싫어 하는 것
             item {
@@ -497,10 +528,30 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                KeywordInputField(
-                    text = "",
+                ActionFieldContainer(
+                    text = uiState.additionalInfo.dislikes.joinToString(" ") { "#$it" },
                     placeholder = "",
-                    onClick = {},
+                    onClick = { showDisLikesDialog = true },
+                    icon = {
+                        ActionFieldTrailingIcon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "싫어하는 것 추가"
+                        )
+                    }
+                )
+
+                KeywordInputDialog(
+                    showDialog = showDisLikesDialog,
+                    title = "싫어하는 것 추가",
+                    initialKeywords = uiState.additionalInfo.dislikes,
+                    onConfirm = { keywords ->
+                        viewModel.onEvent(
+                            AddPersonEvent.DislikesChanged(keywords)
+                        )
+                    },
+                    onDismiss = {
+                        showDisLikesDialog = false
+                    }
                 )
             }
             //싫어 하는 것에 대한 상세 설명
@@ -511,7 +562,8 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P")
+                ExpandableTextField(uiState.additionalInfo.dislikesDescription, {viewModel.onEvent(
+                    AddPersonEvent.DislikesDescriptionChanged(it))}, "", "")
             }
             //특징
             item {
@@ -521,10 +573,30 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                KeywordInputField(
-                    text = "",
+                ActionFieldContainer(
+                    text = uiState.additionalInfo.traits.joinToString(" ") { "#$it" },
                     placeholder = "",
-                    onClick = {},
+                    onClick = { showTraitsDialog = true },
+                    icon = {
+                        ActionFieldTrailingIcon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "특징 추가"
+                        )
+                    }
+                )
+
+                KeywordInputDialog(
+                    showDialog = showTraitsDialog,
+                    title = "좋아하는 것 추가",
+                    initialKeywords = uiState.additionalInfo.traits,
+                    onConfirm = { keywords ->
+                        viewModel.onEvent(
+                            AddPersonEvent.TraitsChanged(keywords)
+                        )
+                    },
+                    onDismiss = {
+                        showTraitsDialog = false
+                    }
                 )
             }
             //특징에 대한 상세 설명
@@ -535,7 +607,8 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P")
+                ExpandableTextField(uiState.additionalInfo.traitsDescription, {viewModel.onEvent(
+                    AddPersonEvent.TraitsDescriptionChanged(it))}, "", "")
             }
             //마지막 연락 날짜
             item {
@@ -545,11 +618,8 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                DateInputField(
-                    text = "",
-                    placeholder = "",
-                    onClick = {},
-                )
+                YeonOutlinedTextField(uiState.additionalInfo.lastContactDateText, {viewModel.onEvent(
+                    AddPersonEvent.LastContactDateChanged(it))}, "", )
             }
             //최근에 만난 곳
             item {
@@ -559,7 +629,8 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P")
+                ExpandableTextField(uiState.additionalInfo.recentMetPlace, {viewModel.onEvent(
+                    AddPersonEvent.LastRecentMetPlaceChanged(it))}, "", "")
             }
             //기억에 남는 최근 대화
             item {
@@ -569,11 +640,11 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P")
+                ExpandableTextField(uiState.additionalInfo.memorableConversationTalk, {viewModel.onEvent(
+                    AddPersonEvent.MemorableConversationTalkChanged(it))}, "", "")
             }
             //이사람과 함께한 사진
             item {
-                //현재는 디폴트 이미지뷰만 , 향 후 데이터 추가에 따라 해당 영역은 목록형으로 수정 예정
                 Text(
                     text = "이 사람과 함께한 사진",
                     color = YeonTextMuted,
@@ -597,14 +668,13 @@ fun AddPersonScreen(
             }
             //이사람이 사는 곳
             item {
-                //주소 입력폼 추후 제작 예정 , 일단은 상세입력폼으로 대체
                 Text(
                     text = "이 사람이 사는 곳",
                     color = YeonTextMuted,
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                YeonOutlinedTextField(uiState.coreInfo.name, {viewModel.onEvent(AddPersonEvent.NameChanged(it))}, "", "")
+                YeonOutlinedTextField(uiState.contactInfo.livingArea, {viewModel.onEvent(AddPersonEvent.LivingAreaChanged(it))}, "", )
             }
             //개인 연락처
             item {
@@ -615,7 +685,8 @@ fun AddPersonScreen(
                     fontSize = 32.sp,
                 )
                 //3등분 영역 InputField 고민 필요.
-                YeonOutlinedTextField("", {}, "", "")
+                YeonOutlinedTextField(uiState.contactInfo.phoneNumber, {viewModel.onEvent(
+                    AddPersonEvent.PhoneNumberChanged(it))}, "", )
             }
             //SNS 링크
             item {
@@ -626,10 +697,28 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                HyperlinkInputField(
-                    text = "",
-                    placeholder = "",
-                    onClick = {},
+                ActionFieldContainer(
+                    text = uiState.contactInfo.snsLink,
+                    placeholder = "대표 SNS 링크를 입력하세요",
+                    onClick = { showSnsDialog = true },
+                    icon = {
+                        ActionFieldTrailingIcon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "SNS 링크 입력"
+                        )
+                    }
+                )
+                SnsLinkInputDialog(
+                    showDialog = showSnsDialog,
+                    initialValue = uiState.contactInfo.snsLink,
+                    onConfirm = { newLink ->
+                        viewModel.onEvent(
+                            AddPersonEvent.ContactInfo.SnsLinkChanged(newLink)
+                        )
+                    },
+                    onDismiss = {
+                        showSnsDialog = false
+                    }
                 )
             }
             //직업
@@ -640,7 +729,7 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                YeonOutlinedTextField("", {}, "", "")
+                YeonOutlinedTextField(uiState.additionalInfo.job, {viewModel.onEvent(AddPersonEvent.JobChanged(it))}, "", )
             }
             //기타메모
             item {
@@ -650,7 +739,7 @@ fun AddPersonScreen(
                     fontFamily = font_nanum_gyuri,
                     fontSize = 32.sp,
                 )
-                ExpandableTextField("", {}, "", "테스트P")
+                ExpandableTextField(uiState.additionalInfo.memo, {viewModel.onEvent(AddPersonEvent.MemoChanged(it))}, "", "")
             }
         }
         PrimaryButton(

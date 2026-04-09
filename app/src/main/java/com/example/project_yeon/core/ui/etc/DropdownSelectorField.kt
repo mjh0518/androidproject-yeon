@@ -55,7 +55,7 @@ fun DropdownSelectorField(
             },
             modifier = Modifier
                 .menuAnchor()
-                .fillMaxWidth().background(Color.White),
+                .fillMaxWidth(),
             enabled = true,
         )
 

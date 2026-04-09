@@ -10,6 +10,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.project_yeon.core.ui.theme.YeonTextMuted
 
@@ -19,14 +21,11 @@ fun YeonOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    placeholder: String,
     modifier: Modifier = Modifier.padding(top = 8.dp).padding(horizontal = 8.dp).height(60.dp),
-    singleLine: Boolean = true,
-    isError: Boolean = false,
-
 ){
     TextField(
         value = value,
+        textStyle = TextStyle(textAlign = TextAlign.Center),
         onValueChange = { newvalue -> onValueChange(newvalue) },
         label = { Text(label) },
         colors = TextFieldDefaults.colors(
@@ -34,6 +33,6 @@ fun YeonOutlinedTextField(
             unfocusedContainerColor = Color.Transparent,
             disabledContainerColor = Color.Transparent,
         ),
-        modifier = Modifier,
+        modifier = modifier,
     )
 }

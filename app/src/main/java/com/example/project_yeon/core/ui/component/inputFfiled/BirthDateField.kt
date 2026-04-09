@@ -19,7 +19,7 @@ fun BirthDateField(
 ) {
     ActionFieldContainer(
         text = birthDate?.toString().orEmpty(),
-        placeholder = "생년월일을 입력하세요",
+        placeholder = "",
         onClick = onClick,
         icon = {
             ActionFieldTrailingIcon(

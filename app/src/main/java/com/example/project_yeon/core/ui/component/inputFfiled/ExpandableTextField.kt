@@ -2,6 +2,7 @@ package com.example.project_yeon.core.ui.component.inputFfiled
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -34,14 +35,18 @@ fun ExpandableTextField(
     onValueChange: (String) -> Unit,
     label: String,
     placeholder: String,
-    modifier: Modifier = Modifier.padding(top = 8.dp).padding(horizontal = 8.dp).height(60.dp),
-    expandedMinHeight: Dp = 160.dp
+    modifier: Modifier = Modifier
+        .padding(top = 8.dp)
+        .padding(horizontal = 8.dp),
+    collapsedHeight: Dp = 60.dp,
+    expandedHeight: Dp = 160.dp
 ) {
     var isFocused by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier
-            .width(600.dp)
-            .height(if (isFocused || value.isNotBlank()) expandedMinHeight else 80.dp),
+            .fillMaxWidth()
+            .height(if (isFocused || value.isNotBlank()) expandedHeight else collapsedHeight),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(5.dp, YeonOutline),
         colors = CardDefaults.cardColors(
@@ -50,20 +55,22 @@ fun ExpandableTextField(
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     ) {
         TextField(
-            value = value, // 현재 텍스트 값
-            onValueChange = { newvalue -> onValueChange(newvalue) }, // 텍스트 변경 시 상태 업데이트
-            label = { Text(label) }, // 라벨 추가
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            placeholder = { Text(placeholder) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
-                // 필요에 따라 밑줄 색상도 투명하게 설정
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
             modifier = Modifier
+                .fillMaxWidth()
                 .onFocusChanged { focusState ->
-                    isFocused = focusState.isFocused },
+                    isFocused = focusState.isFocused
+                }
         )
     }
 }
