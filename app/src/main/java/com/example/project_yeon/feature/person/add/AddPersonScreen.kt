@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,22 +56,25 @@ import com.example.project_yeon.core.ui.etc.RatingBar
 import com.example.project_yeon.core.ui.theme.YeonTextMuted
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
 import androidx.lifecycle.viewmodel.compose.*
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.project_yeon.core.ui.component.dialog.BirthDatePickerDialog
 import com.example.project_yeon.core.ui.component.inputFfiled.BirthDateField
 import com.example.project_yeon.core.ui.component.dialog.ChoiceProfilePhotoDialog
+import com.example.project_yeon.core.ui.component.dialog.DiscardDialog
 import com.example.project_yeon.core.ui.component.dialog.KeywordInputDialog
 import com.example.project_yeon.core.ui.component.dialog.SnsLinkInputDialog
 import com.example.project_yeon.core.ui.component.inputFfiled.ActionFieldContainer
 import com.example.project_yeon.core.ui.etc.ActionFieldTrailingIcon
 import com.example.project_yeon.core.ui.etc.MemoryImageSectionContainer
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
+import androidx.activity.compose.BackHandler
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPersonScreen(
-    onBackClick: () -> Unit,
+    navController : NavController,
     viewModel: AddPersonViewModel = viewModel()
 ) {
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
@@ -129,6 +133,30 @@ fun AddPersonScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                AddPersonEffect.NavigateBack -> {
+                    navController.popBackStack()
+                }
+
+                is AddPersonEffect.ShowSnackbar -> {
+                    //snackbarHostState.showSnackbar(effect.message)
+                }
+
+                AddPersonEffect.LaunchProfileImagePicker -> {
+                    // 런처 실행
+                }
+
+                AddPersonEffect.LaunchMemoryImagePicker -> {
+                    // 런처 실행
+                }
+            }
+        }
+    }
+    BackHandler {
+        viewModel.onEvent(AddPersonEvent.BackClicked)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -147,7 +175,7 @@ fun AddPersonScreen(
                 .weight(1f),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            SecondaryButton(onBackClick, modifier = Modifier.padding(16.dp))
+            SecondaryButton({viewModel.onEvent(AddPersonEvent.BackClicked)}, modifier = Modifier.padding(16.dp))
             Text(
                 "새로운 인연 추가",
                 color = YeonTextOnBackGround,
@@ -155,6 +183,15 @@ fun AddPersonScreen(
                 fontSize = 32.sp,
             )
             Spacer(modifier = Modifier.padding(16.dp))
+            DiscardDialog(
+                showDialog = uiState.showDiscardDialog,
+                onConfirmDiscard = {
+                    viewModel.onEvent(AddPersonEvent.ConfirmDiscardClicked)
+                },
+                onDismiss = {
+                    viewModel.onEvent(AddPersonEvent.DiscardCancel)
+                }
+            )
         }
         LazyColumn(
             contentPadding = PaddingValues(16.dp),

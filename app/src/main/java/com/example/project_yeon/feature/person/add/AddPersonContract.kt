@@ -28,7 +28,18 @@ data class AddPersonCoreInfoState(
     val personality: String = "",
     val firstMetDate: String = "",
     val firstMetPlace: String = ""
-)
+){
+    val isDirty: Boolean
+        get() = name.isNotBlank() ||
+                gender != null ||
+                birthDate != null ||
+                intimacy != 1 ||
+                mbti.isNotBlank() ||
+                personality.isNotBlank() ||
+                firstMetDate.isNotBlank() ||
+                firstMetPlace.isNotBlank() ||
+                profileImageUri !is ProfileImageState.Default
+}
 data class AddPersonAdditionalInfoState(
     val personalityDescription: String = "",
     val likes: List<String> = emptyList(),
@@ -43,19 +54,37 @@ data class AddPersonAdditionalInfoState(
     val memoryImageUris: List<String> = emptyList(),
     val job: String = "",
     val memo: String = ""
-)
+){
+    val isDirty: Boolean
+        get() = likes.isNotEmpty() ||
+                likesDescription.isNotBlank() ||
+                dislikes.isNotEmpty() ||
+                dislikesDescription.isNotBlank() ||
+                traits.isNotEmpty() ||
+                traitsDescription.isNotBlank() ||
+                lastContactDateText.isNotBlank() ||
+                recentMetPlace.isNotBlank() ||
+                memorableConversationTalk.isNotBlank() ||
+                memoryImageUris.isNotEmpty() ||
+                job.isNotBlank() ||
+                memo.isNotBlank()
+}
 
 data class AddPersonContractInfoState(
     val livingArea: String = "",
     val phoneNumber: String = "",
-    val snsLink: String = "",
-
-)
+    val snsLink: String = "",){
+    val isDirty: Boolean
+        get() = livingArea.isNotBlank() ||
+                phoneNumber.isNotBlank() ||
+                snsLink.isNotBlank()
+}
 
 data class AddPersonUiState(
     val coreInfo: AddPersonCoreInfoState = AddPersonCoreInfoState(),
     val additionalInfo: AddPersonAdditionalInfoState = AddPersonAdditionalInfoState(),
-    val contactInfo: AddPersonContractInfoState = AddPersonContractInfoState()
+    val contactInfo: AddPersonContractInfoState = AddPersonContractInfoState(),
+    val showDiscardDialog: Boolean = false,
 ){
     val canSubmit: Boolean
         get() = coreInfo.name.isNotBlank() &&
@@ -65,6 +94,11 @@ data class AddPersonUiState(
         coreInfo.personality.isNotBlank() &&
         coreInfo.firstMetDate != null &&
         coreInfo.firstMetPlace.isNotBlank()
+
+    val isDirty: Boolean
+        get() = coreInfo.isDirty ||
+                additionalInfo.isDirty ||
+                contactInfo.isDirty
 }
 
 sealed interface AddPersonEvent {
@@ -109,8 +143,9 @@ sealed interface AddPersonEvent {
 
     data object SaveClicked : AddPersonEvent
 
-    /* data object BackClicked : AddPersonEvent
-    data object ConfirmDiscardClicked : AddPersonEvent*/
+    data object BackClicked : AddPersonEvent
+    data object ConfirmDiscardClicked : AddPersonEvent
+    data object DiscardCancel : AddPersonEvent
 }
 
 sealed interface AddPersonEffect {

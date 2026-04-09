@@ -4,11 +4,15 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.project_yeon.domain.person.repository.PersonRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.nio.file.Files.copy
 
 class AddPersonViewModel(
@@ -17,11 +21,14 @@ class AddPersonViewModel(
     private val _uiState = MutableStateFlow(AddPersonUiState())
     val uiState: StateFlow<AddPersonUiState> = _uiState.asStateFlow()
 
+    private val _effect = MutableSharedFlow<AddPersonEffect>()
+    val effect = _effect.asSharedFlow()
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun onEvent(event: AddPersonEvent) {
         when (event) {
 
-            is AddPersonEvent.CoreInfo.ProfileImageChanged ->{
+            is AddPersonEvent.CoreInfo.ProfileImageChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         coreInfo = currentState.coreInfo.copy(
@@ -93,7 +100,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.PersonalityDescriptionChanged ->{
+            is AddPersonEvent.PersonalityDescriptionChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -124,7 +131,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.LikesChanged ->{
+            is AddPersonEvent.LikesChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -134,7 +141,8 @@ class AddPersonViewModel(
                     )
                 }
             }
-            is AddPersonEvent.LikesDescriptionChanged ->{
+
+            is AddPersonEvent.LikesDescriptionChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -145,7 +153,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.DislikesChanged ->{
+            is AddPersonEvent.DislikesChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -155,7 +163,8 @@ class AddPersonViewModel(
                     )
                 }
             }
-            is AddPersonEvent.DislikesDescriptionChanged ->{
+
+            is AddPersonEvent.DislikesDescriptionChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -166,7 +175,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.TraitsChanged ->{
+            is AddPersonEvent.TraitsChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -176,7 +185,8 @@ class AddPersonViewModel(
                     )
                 }
             }
-            is AddPersonEvent.TraitsDescriptionChanged ->{
+
+            is AddPersonEvent.TraitsDescriptionChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -188,8 +198,7 @@ class AddPersonViewModel(
             }
 
 
-
-            is AddPersonEvent.LastContactDateChanged ->{
+            is AddPersonEvent.LastContactDateChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -200,7 +209,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.LastRecentMetPlaceChanged ->{
+            is AddPersonEvent.LastRecentMetPlaceChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -211,7 +220,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.MemorableConversationTalkChanged ->{
+            is AddPersonEvent.MemorableConversationTalkChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -249,7 +258,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.LivingAreaChanged ->{
+            is AddPersonEvent.LivingAreaChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         contactInfo = currentState.contactInfo.copy(
@@ -260,7 +269,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.PhoneNumberChanged ->{
+            is AddPersonEvent.PhoneNumberChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         contactInfo = currentState.contactInfo.copy(
@@ -282,7 +291,7 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.JobChanged->{
+            is AddPersonEvent.JobChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -293,10 +302,10 @@ class AddPersonViewModel(
                 }
             }
 
-            is AddPersonEvent.MemoChanged ->{
+            is AddPersonEvent.MemoChanged -> {
                 updateState { currentState ->
                     currentState.copy(
-                        additionalInfo = currentState. additionalInfo.copy(
+                        additionalInfo = currentState.additionalInfo.copy(
                             memo = event.value
                         ),
                         //isDirty = true
@@ -323,10 +332,37 @@ class AddPersonViewModel(
                 }
 
             }
+
+            is AddPersonEvent.BackClicked -> {
+                val currentState = _uiState.value
+
+                if (currentState.isDirty) {
+                    _uiState.value = currentState.copy(showDiscardDialog = true)
+                } else {
+                    sendEffect(AddPersonEffect.NavigateBack)
+                }
+            }
+
+            is AddPersonEvent.ConfirmDiscardClicked -> {
+                _uiState.value = _uiState.value.copy(
+                    showDiscardDialog = false
+                )
+                sendEffect(AddPersonEffect.NavigateBack)
+            }
+
+            is AddPersonEvent.DiscardCancel -> {
+                _uiState.value = _uiState.value.copy(showDiscardDialog = false)
+            }
         }
     }
+
     private fun updateState(transform: (AddPersonUiState) -> AddPersonUiState) {
         _uiState.value = transform(_uiState.value)
     }
 
+    private fun sendEffect(effect: AddPersonEffect) {
+        viewModelScope.launch {
+            _effect.emit(effect)
+        }
+    }
 }

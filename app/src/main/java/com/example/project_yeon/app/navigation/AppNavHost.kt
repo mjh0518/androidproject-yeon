@@ -1,5 +1,7 @@
 package com.example.project_yeon.app.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
@@ -14,6 +16,7 @@ import com.example.project_yeon.feature.person.list.HomeListScreen
 import com.example.project_yeon.feature.person.modify.ModifyPersonScreen
 import com.example.project_yeon.feature.person.trash.TrashScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -50,9 +53,7 @@ fun AppNavHost(
 
         composable(AppRoute.AddPerson.route) {
             AddPersonScreen(
-                onBackClick = {
-                    navController.popBackStack()
-                }
+                navController = navController,
             )
         }
 
