@@ -1,5 +1,6 @@
 package com.example.project_yeon.feature.person.add
 
+import com.example.project_yeon.domain.person.model.PersonCreateRequest
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
 import kotlinx.serialization.descriptors.SerialDescriptor
 import java.time.LocalDate
@@ -99,6 +100,45 @@ data class AddPersonUiState(
         get() = coreInfo.isDirty ||
                 additionalInfo.isDirty ||
                 contactInfo.isDirty
+
+    fun toCreateRequest() : PersonCreateRequest {
+        return PersonCreateRequest(
+            name = coreInfo.name.trim(),
+            gender = coreInfo.gender?.name.orEmpty(),
+            birthDate = coreInfo.birthDate?.toString().orEmpty(),
+            intimacy = coreInfo.intimacy,
+            mbti = coreInfo.mbti,
+            personality = coreInfo.personality,
+            personalityDescription = additionalInfo.personalityDescription,
+            firstMetDate = coreInfo.firstMetDate,
+            firstMetPlace = coreInfo.firstMetPlace.trim(),
+
+            likes = additionalInfo.likes,
+            likesDescription = additionalInfo.likesDescription,
+            dislikes = additionalInfo.dislikes,
+            dislikesDescription = additionalInfo.dislikesDescription,
+            traits = additionalInfo.traits,
+            traitsDescription = additionalInfo.traitsDescription,
+
+            lastContactDateText = additionalInfo.lastContactDateText,
+            recentMetPlace = additionalInfo.recentMetPlace,
+            memorableConversationTalk = additionalInfo.memorableConversationTalk,
+            memoryImageUris = additionalInfo.memoryImageUris,
+
+            livingArea = contactInfo.livingArea,
+            phoneNumber = contactInfo.phoneNumber,
+            snsLink = contactInfo.snsLink,
+            job = additionalInfo.job,
+            memo = additionalInfo.memo,
+
+            profileImageUri = when (val image = coreInfo.profileImageUri) {
+                is ProfileImageState.Custom -> image.uri
+                ProfileImageState.Default -> null
+            }
+        )
+    }
+
+
 }
 
 sealed interface AddPersonEvent {

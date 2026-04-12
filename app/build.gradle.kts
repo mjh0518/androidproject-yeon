@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:${lifecycle_version}")
     implementation("com.google.dagger:hilt-android:2.57.1")
+    implementation("androidx.hilt:hilt-lifecycle-viewmodel-compose:1.3.0")
     ksp("com.google.dagger:hilt-compiler:2.57.1")
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

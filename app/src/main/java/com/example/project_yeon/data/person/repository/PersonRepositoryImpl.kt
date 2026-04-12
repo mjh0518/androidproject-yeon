@@ -41,30 +41,7 @@ class PersonRepositoryImpl (
             val oldEntity = personDao.getById(request.personId)
                 ?: throw IllegalArgumentException("해당 Person이 존재하지 않습니다.\n")
 
-            val updatedEntity = oldEntity.copy(
-                name = request.name,
-                gender = request.gender,
-                birthDate = request.birthDate,
-                closeness = request.closeness,
-                mbti = request.mbti,
-                personality = request.personality,
-                personalityDetail = request.personalityDetail,
-                firstMetDay = request.firstMetDay,
-                firstMetPlace = request.firstMetPlace,
-                likes = request.likes,
-                dislikes = request.dislikes,
-                characteristics = request.characteristics,
-                lastContactAt = request.lastContactAt,
-                lastMetPlace = request.lastMetPlace,
-                recentConversation = request.recentConversation,
-                photos = request.photos,
-                address = request.address,
-                phone = request.phone,
-                sns = request.sns,
-                job = request.job,
-                memo = request.memo,
-                updatedAt = System.currentTimeMillis()
-            )
+            val updatedEntity = request.toEntity(oldEntity)
             personDao.update(updatedEntity)
         }
     }

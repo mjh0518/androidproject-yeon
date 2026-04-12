@@ -5,7 +5,11 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.project_yeon.domain.person.repository.PersonRepository
+import com.example.project_yeon.core.common.result.ResultWrapper
+import com.example.project_yeon.domain.person.usecase.CreatePersonUseCase
+import com.example.project_yeon.domain.person.usecase.ValidatePersonDraftUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,10 +17,10 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.nio.file.Files.copy
-
-class AddPersonViewModel(
-    //private val repo : PersonRepository
+@HiltViewModel
+class AddPersonViewModel @Inject constructor(
+    private val createPersonUseCase: CreatePersonUseCase,
+    private val validatePersonDraftUseCase: ValidatePersonDraftUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddPersonUiState())
     val uiState: StateFlow<AddPersonUiState> = _uiState.asStateFlow()
@@ -34,7 +38,6 @@ class AddPersonViewModel(
                         coreInfo = currentState.coreInfo.copy(
                             profileImageUri = event.image
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -65,7 +68,6 @@ class AddPersonViewModel(
                         coreInfo = currentState.coreInfo.copy(
                             birthDate = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -106,7 +108,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             personalityDescription = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -137,7 +138,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             likes = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -148,7 +148,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             likesDescription = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -159,7 +158,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             dislikes = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -170,7 +168,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             dislikesDescription = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -181,7 +178,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             traits = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -192,7 +188,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             traitsDescription = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -204,7 +199,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             lastContactDateText = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -215,7 +209,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             recentMetPlace = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -226,7 +219,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             memorableConversationTalk = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -241,7 +233,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             memoryImageUris = merged
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -253,7 +244,6 @@ class AddPersonViewModel(
                             memoryImageUris = currentState.additionalInfo.memoryImageUris
                                 .filterNot { it == event.uri }
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -264,7 +254,6 @@ class AddPersonViewModel(
                         contactInfo = currentState.contactInfo.copy(
                             livingArea = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -275,7 +264,6 @@ class AddPersonViewModel(
                         contactInfo = currentState.contactInfo.copy(
                             phoneNumber = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -286,7 +274,6 @@ class AddPersonViewModel(
                         contactInfo = currentState.contactInfo.copy(
                             snsLink = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -297,7 +284,6 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             job = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
@@ -308,27 +294,30 @@ class AddPersonViewModel(
                         additionalInfo = currentState.additionalInfo.copy(
                             memo = event.value
                         ),
-                        //isDirty = true
                     )
                 }
             }
 
             is AddPersonEvent.SaveClicked -> {
-                val core = _uiState.value.coreInfo
-
-                val isValid =
-                    core.name.isNotBlank() &&
-                            core.gender != null &&
-                            core.birthDate != null &&
-                            core.mbti.isNotBlank() &&
-                            core.personality.isNotBlank() &&
-                            core.firstMetDate != null &&
-                            core.firstMetPlace.isNotBlank()
-
-                if (isValid) {
-                    Log.d("AddPersonViewModel", "Save validation success")
+                val validateResult = validatePersonDraftUseCase(_uiState.value)
+                if (!validateResult.isValid) {
+                    viewModelScope.launch {
+                        sendEffect(AddPersonEffect.ShowSnackbar(
+                            validateResult.message ?: "필수 입력값을 확인해주세요."))
+                    }
+                    return
                 } else {
-                    Log.d("AddPersonViewModel", "Save validation fail")
+                    val request = _uiState.value.toCreateRequest()
+                    viewModelScope.launch {
+                        when (val result = createPersonUseCase(request)) {
+                            is ResultWrapper.Success -> {
+                                sendEffect(AddPersonEffect.NavigateBack)
+                            }
+                            is ResultWrapper.Error -> {
+                                sendEffect(AddPersonEffect.ShowSnackbar("저장에 실패했습니다."))
+                            }
+                        }
+                    }
                 }
 
             }

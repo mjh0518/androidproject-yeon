@@ -2,6 +2,7 @@ package com.example.project_yeon.feature.person.add
 
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,9 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.component.button.PrimaryButton
 import com.example.project_yeon.core.ui.component.button.SecondaryButton
-import com.example.project_yeon.core.ui.component.inputFfiled.DateInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.ExpandableTextField
-import com.example.project_yeon.core.ui.component.inputFfiled.KeywordInputField
 import com.example.project_yeon.core.ui.component.inputFfiled.YeonOutlinedTextField
 import com.example.project_yeon.core.ui.etc.DropdownSelectorField
 import com.example.project_yeon.core.ui.etc.RatingBar
@@ -69,13 +70,14 @@ import com.example.project_yeon.core.ui.etc.ActionFieldTrailingIcon
 import com.example.project_yeon.core.ui.etc.MemoryImageSectionContainer
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
 import androidx.activity.compose.BackHandler
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPersonScreen(
     navController : NavController,
-    viewModel: AddPersonViewModel = viewModel()
+    viewModel: AddPersonViewModel = hiltViewModel(),
 ) {
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
@@ -99,12 +101,15 @@ fun AddPersonScreen(
 
     var expandedOfMbti by remember { mutableStateOf(false) }
     var expandedOfPersonal by remember { mutableStateOf(false) }
-    var showBirthDatePicker by rememberSaveable { mutableStateOf(false) }
+    var showSnsDialog by remember{mutableStateOf(false)}
     var showChoiceProfileDialog by remember { mutableStateOf(false) }
     var showLikesDialog by rememberSaveable { mutableStateOf(false) }
-    var showDisLikesDialog by rememberSaveable { mutableStateOf(false) }
     var showTraitsDialog by rememberSaveable { mutableStateOf(false) }
-    var showSnsDialog by remember{mutableStateOf(false)}
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showBirthDatePicker by rememberSaveable { mutableStateOf(false) }
+    var showDisLikesDialog by rememberSaveable { mutableStateOf(false) }
+
+
 
     // 프로필 사진 전용 Picker(단일 사진)
     val photoPicker = rememberLauncherForActivityResult(
@@ -135,13 +140,16 @@ fun AddPersonScreen(
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
+            Log.d("AddPersonScreen", "collected effect = $effect")
             when (effect) {
                 AddPersonEffect.NavigateBack -> {
+                    Log.d("AddPersonScreen", "popBackStack called")
                     navController.popBackStack()
                 }
 
                 is AddPersonEffect.ShowSnackbar -> {
-                    //snackbarHostState.showSnackbar(effect.message)
+                    Log.d("AddPersonScreen", "showSnackbar called")
+                    snackbarHostState.showSnackbar(effect.message)
                 }
 
                 AddPersonEffect.LaunchProfileImagePicker -> {

@@ -99,31 +99,6 @@ fun KeywordInputDialog(
                             Text("#$keyword")
                         }
                     }
-                    /*keywords.chunked(2).forEach { rowKeywords ->
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            rowKeywords.forEach { keyword ->
-                                AssistChip(
-                                    onClick = {},
-                                    label = { Text("#$keyword") },
-                                    trailingIcon = {
-                                        IconButton(
-                                            onClick = {
-                                                keywords = keywords.filterNot { it == keyword }
-                                            },
-                                            modifier = Modifier.size(18.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = "키워드 삭제"
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }*/
                 }
             }
         },

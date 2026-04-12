@@ -1,6 +1,8 @@
 package com.example.project_yeon.data.local.entity
 
-import androidx.room.*
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "person",
@@ -14,27 +16,37 @@ data class PersonEntity(
     @PrimaryKey(autoGenerate = true)
     val personId: Long = 0,
 
-    val name : String, // 이름
-    val gender : String, // 성별
-    val birthDate : String, // 생년월일
-    val closeness : Int, // 친밀도 (Rating)
-    val mbti : String, // MBTI
-    val personality : String, // 성격(드랍다운형)
-    val personalityDetail : String?, //성격에 대한 상세 설명
-    val firstMetDay : String, // 처음 만난 날
-    val firstMetPlace : String, // 처음 만난 곳
-    val likes: String?,     // 좋아하는 것 (키워드 + 상세설명) - JSON string
-    val dislikes: String?,  // 싫어하는 것 (키워드 + 상세설명) - JSON string
-    val characteristics : String?,  // 특징(키워드 + 상세 설명)JSON string
-    val lastContactAt: String?, // 마지막 연락 날짜
-    val lastMetPlace: String?, // 최근 만난 곳
-    val recentConversation: String?, // 기억에 남는 최근 대화
-    val photos: String?,    // 함께한 사진들 JSON string
-    val address: String?,   // 거주지 , encrypted
-    val phone: String?,     // 전화번호, encrypted
-    val sns: String?,       // 개인 sns 링크 encrypted
-    val job : String?,      // 직업
-    val memo : String?,      // 기타 메모
+    val name: String,                       // 이름
+    val gender: String,                     // 성별
+    val birthDate: String,                  // 생년월일
+    val intimacy: Int,                      // 친밀도
+    val mbti: String,                       // MBTI
+    val personality: String,                // 성격
+    val personalityDescription: String?,    // 성격 상세 설명
+
+    val firstMetDate: String,               // 처음 만난 날
+    val firstMetPlace: String,              // 처음 만난 곳
+
+    val likes: String?,                     // 좋아하는 것 키워드 JSON
+    val likesDescription: String?,          // 좋아하는 것 상세 설명
+    val dislikes: String?,                  // 싫어하는 것 키워드 JSON
+    val dislikesDescription: String?,       // 싫어하는 것 상세 설명
+    val traits: String?,                    // 특징 키워드 JSON
+    val traitsDescription: String?,         // 특징 상세 설명
+
+    val lastContactDateText: String?,       // 마지막 연락 날짜
+    val recentMetPlace: String?,            // 최근 만난 곳
+    val memorableConversationTalk: String?, // 기억에 남는 최근 대화
+    val memoryImageUris: String?,           // 함께한 사진들 JSON
+
+    val profileImageUri: String?,           // 프로필 이미지 URI
+
+    val livingArea: String?,                // 거주지
+    val phoneNumber: String?,               // 전화번호
+    val snsLink: String?,                   // 대표 SNS 링크
+    val job: String?,                       // 직업
+    val memo: String?,                      // 기타 메모
+
     val pinned: Boolean = false,
     val createdAt: Long,
     val updatedAt: Long

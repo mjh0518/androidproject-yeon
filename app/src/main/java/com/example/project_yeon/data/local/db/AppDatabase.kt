@@ -16,6 +16,6 @@ import com.example.project_yeon.data.local.entity.*
 )
 abstract class AppDataBase : RoomDatabase(){
     abstract fun personDao() : PersonDao
-    abstract fun historyDao() : HiddenPersonDao
+    abstract fun hiddenpersonDao() : HiddenPersonDao
     //abstract fun securityDao() : SecurityConfigDao
 }

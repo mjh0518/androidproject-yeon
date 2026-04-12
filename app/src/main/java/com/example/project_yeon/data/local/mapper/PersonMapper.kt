@@ -4,6 +4,24 @@ import com.example.project_yeon.data.local.entity.PersonEntity
 import com.example.project_yeon.domain.person.model.Person
 import com.example.project_yeon.domain.person.model.PersonCreateRequest
 import com.example.project_yeon.domain.person.model.PersonUpdateRequest
+import org.json.JSONArray
+
+private fun List<String>.toJsonString(): String? {
+    return if (isEmpty()) null else JSONArray(this).toString()
+}
+
+private fun String?.toStringList(): List<String> {
+    if (this.isNullOrBlank()) return emptyList()
+
+    return try {
+        val jsonArray = JSONArray(this)
+        List(jsonArray.length()) { index ->
+            jsonArray.getString(index)
+        }
+    } catch (e: Exception) {
+        emptyList()
+    }
+}
 
 fun PersonEntity.toDomain(): Person {
     return Person(
@@ -11,24 +29,33 @@ fun PersonEntity.toDomain(): Person {
         name = name,
         gender = gender,
         birthDate = birthDate,
-        closeness = closeness,
+        intimacy = intimacy,
         mbti = mbti,
         personality = personality,
-        personalityDetail = personalityDetail,
-        firstMetDay = firstMetDay,
+        personalityDescription = personalityDescription,
+        firstMetDate = firstMetDate,
         firstMetPlace = firstMetPlace,
-        likes = likes,
-        dislikes = dislikes,
-        characteristics = characteristics,
-        lastContactAt = lastContactAt,
-        lastMetPlace = lastMetPlace,
-        recentConversation = recentConversation,
-        photos = photos,
-        address = address,
-        phone = phone,
-        sns = sns,
-        job = job,
-        memo = memo,
+
+        likes = likes.toStringList(),
+        likesDescription = likesDescription ?: "",
+        dislikes = dislikes.toStringList(),
+        dislikesDescription = dislikesDescription ?: "",
+        traits = traits.toStringList(),
+        traitsDescription = traitsDescription ?: "",
+
+        lastContactDateText = lastContactDateText ?: "",
+        recentMetPlace = recentMetPlace ?: "",
+        memorableConversationTalk = memorableConversationTalk ?: "",
+        memoryImageUris = memoryImageUris.toStringList(),
+
+        livingArea = livingArea ?: "",
+        phoneNumber = phoneNumber ?: "",
+        snsLink = snsLink ?: "",
+        job = job ?: "",
+        memo = memo ?: "",
+
+        profileImageUri = profileImageUri,
+
         pinned = pinned,
         createdAt = createdAt,
         updatedAt = updatedAt
@@ -42,54 +69,73 @@ fun PersonCreateRequest.toEntity(
     return PersonEntity(
         name = name,
         gender = gender,
-        birthDate = birthDate.toString(),
-        closeness = closeness,
+        birthDate = birthDate,
+        intimacy = intimacy,
         mbti = mbti,
         personality = personality,
-        personalityDetail = personalityDetail,
-        firstMetDay = firstMetDay,
+        personalityDescription = personalityDescription.ifBlank { null },
+        firstMetDate = firstMetDate,
         firstMetPlace = firstMetPlace,
-        likes = likes,
-        dislikes = dislikes,
-        characteristics = characteristics,
-        lastContactAt = lastContactAt,
-        lastMetPlace = lastMetPlace,
-        recentConversation = recentConversation,
-        photos = photos,
-        address = address,
-        phone = phone,
-        sns = sns,
-        job = job,
-        memo = memo,
+
+        likes = likes.toJsonString(),
+        likesDescription = likesDescription.ifBlank { null },
+        dislikes = dislikes.toJsonString(),
+        dislikesDescription = dislikesDescription.ifBlank { null },
+        traits = traits.toJsonString(),
+        traitsDescription = traitsDescription.ifBlank { null },
+
+        lastContactDateText = lastContactDateText.ifBlank { null },
+        recentMetPlace = recentMetPlace.ifBlank { null },
+        memorableConversationTalk = memorableConversationTalk.ifBlank { null },
+        memoryImageUris = memoryImageUris.toJsonString(),
+
+        livingArea = livingArea.ifBlank { null },
+        phoneNumber = phoneNumber.ifBlank { null },
+        snsLink = snsLink.ifBlank { null },
+        job = job.ifBlank { null },
+        memo = memo.ifBlank { null },
+
+        profileImageUri = profileImageUri,
+
         pinned = false,
         createdAt = createdAt,
         updatedAt = updatedAt
     )
 }
+
 fun PersonUpdateRequest.toEntity(old: PersonEntity): PersonEntity {
     return old.copy(
         name = name,
         gender = gender,
         birthDate = birthDate,
-        closeness = closeness,
+        intimacy = intimacy,
         mbti = mbti,
         personality = personality,
-        personalityDetail = personalityDetail,
-        firstMetDay = firstMetDay,
+        personalityDescription = personalityDescription.ifBlank { null },
+        firstMetDate = firstMetDate,
         firstMetPlace = firstMetPlace,
-        likes = likes,
-        dislikes = dislikes,
-        characteristics = characteristics,
-        lastContactAt = lastContactAt,
-        lastMetPlace = lastMetPlace,
-        recentConversation = recentConversation,
-        photos = photos,
-        address = address,
-        phone = phone,
-        sns = sns,
-        job = job,
-        memo = memo,
+
+        likes = likes.toJsonString(),
+        likesDescription = likesDescription.ifBlank { null },
+        dislikes = dislikes.toJsonString(),
+        dislikesDescription = dislikesDescription.ifBlank { null },
+        traits = traits.toJsonString(),
+        traitsDescription = traitsDescription.ifBlank { null },
+
+        lastContactDateText = lastContactDateText.ifBlank { null },
+        recentMetPlace = recentMetPlace.ifBlank { null },
+        memorableConversationTalk = memorableConversationTalk.ifBlank { null },
+        memoryImageUris = memoryImageUris.toJsonString(),
+
+        livingArea = livingArea.ifBlank { null },
+        phoneNumber = phoneNumber.ifBlank { null },
+        snsLink = snsLink.ifBlank { null },
+        job = job.ifBlank { null },
+        memo = memo.ifBlank { null },
+
+        profileImageUri = profileImageUri,
+        pinned = pinned,
+
         updatedAt = System.currentTimeMillis()
     )
 }
-

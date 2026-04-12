@@ -1,5 +1,7 @@
 package com.example.project_yeon.app
 
-//앱 최상위 루트 - 임시 Composable
-class YeonApp {
-}
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class YeonApp : Application()
