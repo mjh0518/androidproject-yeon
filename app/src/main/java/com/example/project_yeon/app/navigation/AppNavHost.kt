@@ -42,12 +42,6 @@ fun AppNavHost(
                 onNavigateToAdd = {
                     navController.navigate(AppRoute.AddPerson.route)
                 },
-                onNavigateToDetail = { personId ->
-                    navController.navigate(AppRoute.DetailPerson.createRoute(personId))
-                },
-                onNavigateToTrash = {
-                    navController.navigate(AppRoute.Trash.route)
-                }
             )
         }
 

@@ -70,6 +70,9 @@ import com.example.project_yeon.core.ui.etc.ActionFieldTrailingIcon
 import com.example.project_yeon.core.ui.etc.MemoryImageSectionContainer
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
 import androidx.activity.compose.BackHandler
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -189,6 +192,13 @@ fun AddPersonScreen(
                 color = YeonTextOnBackGround,
                 fontFamily = font_nanum_pen,
                 fontSize = 32.sp,
+                style = TextStyle(
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.2f),
+                        offset = Offset(8f, 8f),
+                        blurRadius = 2f
+                    )
+                )
             )
             Spacer(modifier = Modifier.padding(16.dp))
             DiscardDialog(
