@@ -4,43 +4,47 @@ import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.project_yeon.R
-import com.example.project_yeon.core.ui.component.card.AppCard
+import com.example.project_yeon.core.ui.component.card.PersonExpandedSection
 import com.example.project_yeon.core.ui.component.card.PersonListCard
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
+
 @Composable
 fun HomeListScreen(
-    onNavigateToAdd: () -> Unit,
+    navController: NavController,
     viewModel: HomeListViewModel = hiltViewModel(),
 ) {
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
-    val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
-
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is HomeListEffect.NavigateToAdd ->{
+                    navController.navigate("add_person")
+                }
+                is HomeListEffect.NavigateToDetail -> {
+                    navController.navigate("detail_Person/${effect.personId}")
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -53,10 +57,12 @@ fun HomeListScreen(
     ) {
         HomeListHeader(
             fontNanumPen = font_nanum_pen,
-            onNavigateToAdd = onNavigateToAdd
+            onNavigateToAdd = {viewModel.onEvent(HomeListEvent.OnAddClick)}
         )
         HorizontalDivider(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
             thickness = 3.dp,
             color = YeonTextOnBackGround.copy(alpha = 0.25f)
         )
@@ -75,8 +81,15 @@ fun HomeListScreen(
                         viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
                     }
                 )
+                if (uiState.expandedPersonId == person.personId) {
+                    PersonExpandedSection(
+                        person = person,
+                        onMoreDetailClick = {
+                            viewModel.onEvent(HomeListEvent.OnMoreDetailClick(person.personId))
+                        }
+                    )
+                }
             }
         }
-        //
     }
 }

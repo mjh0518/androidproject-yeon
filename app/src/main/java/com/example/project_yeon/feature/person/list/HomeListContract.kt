@@ -14,12 +14,13 @@ data class HomeListState(
 }
 
 sealed interface HomeListEvent {
+    data object OnAddClick : HomeListEvent
     data class OnExpandClick(val personId: Long) : HomeListEvent
     data class OnMoreDetailClick(val personId: Long) : HomeListEvent
 }
 
 sealed interface HomeListEffect {
-
+    data object NavigateToAdd : HomeListEffect
+    data class NavigateToDetail(val personId: Long) : HomeListEffect
 }
-
 

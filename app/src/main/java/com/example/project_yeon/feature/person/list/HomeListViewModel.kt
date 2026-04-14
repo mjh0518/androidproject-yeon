@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.project_yeon.domain.person.usecase.ObservePersonListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
@@ -18,6 +20,10 @@ class HomeListViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeListState())
     val uiState : StateFlow<HomeListState> = _uiState.asStateFlow()
+    private val _effect = MutableSharedFlow<HomeListEffect>()
+    val effect = _effect.asSharedFlow()
+
+
 
     init{
         observePersons()
@@ -46,19 +52,27 @@ class HomeListViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event : HomeListEvent){
-        when(event){
-            is HomeListEvent.OnExpandClick ->{
+    fun onEvent(event : HomeListEvent) {
+        when (event) {
+            is HomeListEvent.OnAddClick -> {
+                viewModelScope.launch {
+                    _effect.emit(HomeListEffect.NavigateToAdd)
+                }
+            }
+            is HomeListEvent.OnExpandClick -> {
                 _uiState.update { currentState ->
                     currentState.copy(
                         expandedPersonId =
-                            if(currentState.expandedPersonId == event.personId) null
+                            if (currentState.expandedPersonId == event.personId) null
                             else event.personId
                     )
                 }
             }
-            is HomeListEvent.OnMoreDetailClick ->{
 
+            is HomeListEvent.OnMoreDetailClick -> {
+                viewModelScope.launch {
+                    _effect.emit(HomeListEffect.NavigateToDetail(event.personId))
+                }
             }
         }
     }

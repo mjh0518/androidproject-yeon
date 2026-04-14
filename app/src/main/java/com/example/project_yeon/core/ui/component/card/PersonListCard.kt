@@ -151,7 +151,7 @@ fun PersonListCard(
             }
             Spacer(modifier = Modifier.width(50.dp))
             IconButton(
-                onClick = {},
+                onClick = onExpandClick,
                 modifier = Modifier.size(36.dp).padding(top = 8.dp)
             ) {
                 Icon(

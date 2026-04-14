@@ -39,9 +39,7 @@ fun AppNavHost(
 
         composable(AppRoute.HomeList.route) {
             HomeListScreen(
-                onNavigateToAdd = {
-                    navController.navigate(AppRoute.AddPerson.route)
-                },
+                navController = navController,
             )
         }
 
