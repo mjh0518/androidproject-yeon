@@ -33,11 +33,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.theme.YeonOutline
 import com.example.project_yeon.core.ui.theme.YeonOutline_2
 import com.example.project_yeon.core.ui.theme.YeonSurface
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
+import java.io.File
 
 @Composable
 fun PersonListCard(
@@ -93,11 +95,18 @@ fun PersonListCard(
                         shape = RoundedCornerShape(4.dp)
                     ),
             ) {
-                Image(
-                    painter = painterResource(R.drawable.profile_default),
+                AsyncImage(
+                    model = if (profileimage.isNullOrBlank()) {
+                        R.drawable.profile_default
+                    } else {
+                        File(profileimage)
+                    },
                     contentDescription = "프로필 이미지",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    error = painterResource(R.drawable.profile_default),
+                    fallback = painterResource(R.drawable.profile_default),
+                    placeholder = painterResource(R.drawable.profile_default)
                 )
             }
             Spacer(modifier = Modifier.width(30.dp))

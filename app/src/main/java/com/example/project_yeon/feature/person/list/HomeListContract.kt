@@ -1,0 +1,25 @@
+package com.example.project_yeon.feature.person.list
+
+import com.example.project_yeon.domain.person.model.PersonListItem
+
+
+data class HomeListState(
+    val isLoading: Boolean = true,
+    val persons: List<PersonListItem> = emptyList(),
+    val expandedPersonId: Long? = null,
+    val errorMessage: String? = null,
+) {
+    val isEmpty: Boolean
+        get() = !isLoading && persons.isEmpty()
+}
+
+sealed interface HomeListEvent {
+    data class OnExpandClick(val personId: Long) : HomeListEvent
+    data class OnMoreDetailClick(val personId: Long) : HomeListEvent
+}
+
+sealed interface HomeListEffect {
+
+}
+
+

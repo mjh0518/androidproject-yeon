@@ -4,16 +4,6 @@ import com.example.project_yeon.domain.person.model.PersonCreateRequest
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
 import kotlinx.serialization.descriptors.SerialDescriptor
 import java.time.LocalDate
-/*
-data class AddPersonUiState(
-    val coreInfo: AddPersonCoreInfoState = AddPersonCoreInfoState(),
-    val relationInfo: AddPersonRelationInfoState = AddPersonRelationInfoState(),
-    val additionalInfo: AddPersonAdditionalInfoState = AddPersonAdditionalInfoState(),
-    val contactInfo: AddPersonContactInfoState = AddPersonContactInfoState(),
-    val fieldErrors: Map<AddPersonField, String> = emptyMap(),
-    val isDirty: Boolean = false,
-    val isSaving: Boolean = false
-)*/
 
 enum class Gender {
     MALE, FEMALE

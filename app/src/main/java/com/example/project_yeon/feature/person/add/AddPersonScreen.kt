@@ -26,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -74,6 +73,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.project_yeon.core.common.image.ImageStorageHelper
+import androidx.compose.ui.platform.LocalContext
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,6 +87,8 @@ fun AddPersonScreen(
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
 
     val uiState by viewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
 
     val mbtiList = listOf(
         "ISTJ", "ISFJ", "INFJ", "INTJ",
@@ -118,13 +121,19 @@ fun AddPersonScreen(
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
-        // 결과를 ViewModel로 올림 → 미리보기 표시
         if (uri != null) {
-            viewModel.onEvent(
-                AddPersonEvent.CoreInfo.ProfileImageChanged(
-                    ProfileImageState.Custom(uri.toString())
-                )
+            val savedPath = ImageStorageHelper.copyProfileImageToInternalStorage(
+                context = context,
+                sourceUri = uri
             )
+
+            if (savedPath != null) {
+                viewModel.onEvent(
+                    AddPersonEvent.CoreInfo.ProfileImageChanged(
+                        ProfileImageState.Custom(savedPath)
+                    )
+                )
+            }
         }
     }
 
