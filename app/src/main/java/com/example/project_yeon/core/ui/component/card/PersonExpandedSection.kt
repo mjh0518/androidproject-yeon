@@ -108,7 +108,7 @@ fun PersonExpandedSection(
                 ) {
                     ExpandedInfoRow(
                         label = "성별 : ",
-                        value = person.genderText ?: "-"
+                        value = when(person.genderText){"MALE" ->{"남"} "FEMALE"->{"여"} else -> ""}
                     )
                     ExpandedInfoRow(
                         label = "성격 : ",

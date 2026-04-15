@@ -1,5 +1,6 @@
 package com.example.project_yeon.feature.person.list
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_yeon.domain.person.usecase.ObservePersonListUseCase
@@ -31,21 +32,30 @@ class HomeListViewModel @Inject constructor(
 
     private fun observePersons(){
         viewModelScope.launch {
+            Log.d("HomeListVM", "observePersons start")
+
             observePersonListUseCase()
-                .catch {
+                .catch { throwable ->
+                    Log.d(
+                        "HomeListVM",
+                        "error type=${throwable::class.java.simpleName}, message=${throwable.message}"
+                    )
+
                     _uiState.update { currentState ->
                         currentState.copy(
                             isLoading = false,
-                            errorMessage = "목록을 불러오지 못했습니다."
+                            errorMessage = throwable.message ?: "목록을 불러오지 못했습니다."
                         )
                     }
                 }
                 .collect{ personList ->
+                    Log.d("HomeListVM", "collect success, size=${personList.size}")
+
                     _uiState.update{ currentState ->
                         currentState.copy(
                             isLoading = false,
                             persons = personList,
-                            errorMessage = "목록을 불러오지 못했습니다."
+                            errorMessage = null
                         )
                     }
                 }
@@ -75,5 +85,15 @@ class HomeListViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun retryObservePersons() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                isLoading = true,
+                errorMessage = null
+            )
+        }
+        observePersons()
     }
 }

@@ -651,7 +651,7 @@ fun AddPersonScreen(
 
                 KeywordInputDialog(
                     showDialog = showTraitsDialog,
-                    title = "좋아하는 것 추가",
+                    title = "특징 추가",
                     initialKeywords = uiState.additionalInfo.traits,
                     onConfirm = { keywords ->
                         viewModel.onEvent(
