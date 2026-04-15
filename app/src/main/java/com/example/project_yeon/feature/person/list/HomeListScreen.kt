@@ -234,8 +234,12 @@ fun HomeListScreen(
                             name = person.name,
                             intimacy = person.intimacy,
                             isExpanded = uiState.expandedPersonId == person.personId,
+                            isPinned = uiState.pinnedPersonIds.contains(person.personId),
                             onExpandClick = {
                                 viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
+                            },
+                            onPinClick = {
+                                viewModel.onEvent(HomeListEvent.OnPinClick(person.personId))
                             }
                         )
                         if (uiState.expandedPersonId == person.personId) {

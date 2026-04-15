@@ -47,8 +47,10 @@ fun PersonListCard(
     name: String,
     intimacy: Int,
     isExpanded: Boolean = false,
+    isPinned: Boolean = false,
     onExpandClick: () -> Unit,
-) {
+    onPinClick: () -> Unit,
+){
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
 
     val alphaofintimacy = when(intimacy){
@@ -161,16 +163,18 @@ fun PersonListCard(
                     tint = YeonOutline_2
                 )
             }
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             IconButton(
-                onClick = {},
-                modifier = Modifier.size(36.dp).padding(top = 8.dp)
+                onClick = onPinClick,
+                modifier = Modifier
+                    .size(36.dp)
+                    .padding(top = 8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "",
-                    modifier = Modifier.size(36.dp),
-                    tint = Color.Black
+                    painter = painterResource(id = R.drawable.ic_pin),
+                    contentDescription = "고정 상태 토글",
+                    modifier = Modifier.size(28.dp),
+                    tint = if (isPinned) Color.Black else Color.LightGray.copy(alpha = 0.45f)
                 )
             }
         }

@@ -78,6 +78,22 @@ class HomeListViewModel @Inject constructor(
                     )
                 }
             }
+            is HomeListEvent.OnPinClick -> {
+                _uiState.update { currentState ->
+                    val updatedPinnedIds =
+                        if (currentState.pinnedPersonIds.contains(event.personId)) {
+                            currentState.pinnedPersonIds - event.personId
+                        } else {
+                            currentState.pinnedPersonIds + event.personId
+                        }
+
+                    currentState.copy(
+                        pinnedPersonIds = updatedPinnedIds
+                    )
+                }
+
+                //TODO: 고정 기능 구현
+            }
 
             is HomeListEvent.OnMoreDetailClick -> {
                 viewModelScope.launch {
