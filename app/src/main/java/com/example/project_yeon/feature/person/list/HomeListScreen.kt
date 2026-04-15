@@ -223,7 +223,41 @@ fun HomeListScreen(
                     thickness = 3.dp,
                     color = YeonTextOnBackGround.copy(alpha = 0.25f)
                 )
-                LazyColumn(modifier = Modifier.padding(12.dp)) {
+                LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
+                    items(
+                        items = uiState.persons,
+                        key = { it.personId }
+                    ) { person ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            PersonListCard(
+                                profileimage = person.profileImageUri,
+                                name = person.name,
+                                intimacy = person.intimacy,
+                                isExpanded = uiState.expandedPersonId == person.personId,
+                                isPinned = uiState.pinnedPersonIds.contains(person.personId),
+                                onExpandClick = {
+                                    viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
+                                },
+                                onPinClick = {
+                                    viewModel.onEvent(HomeListEvent.OnPinClick(person.personId))
+                                }
+                            )
+
+                            if (uiState.expandedPersonId == person.personId) {
+                                PersonExpandedSection(
+                                    person = person,
+                                    onMoreDetailClick = {
+                                        viewModel.onEvent(HomeListEvent.OnMoreDetailClick(person.personId))
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    /*
                     items(
                         items = uiState.persons,
                         key = { it.personId }
@@ -251,6 +285,7 @@ fun HomeListScreen(
                             )
                         }
                     }
+                    */
                 }
             }
         }

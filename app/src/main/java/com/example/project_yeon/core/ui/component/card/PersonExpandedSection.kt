@@ -49,7 +49,7 @@ fun PersonExpandedSection(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 22.dp),
         shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
         border = BorderStroke(2.dp, YeonOutline),
         colors = CardDefaults.cardColors(

@@ -3,6 +3,7 @@ package com.example.project_yeon.core.ui.component.card
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -50,23 +52,27 @@ fun PersonListCard(
     isPinned: Boolean = false,
     onExpandClick: () -> Unit,
     onPinClick: () -> Unit,
-){
+) {
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
 
-    val alphaofintimacy = when(intimacy){
-        1->{
+    val alphaofintimacy = when (intimacy) {
+        1 -> {
             0.2f
         }
-        2->{
+
+        2 -> {
             0.4f
         }
-        3->{
+
+        3 -> {
             0.6f
         }
-        4->{
+
+        4 -> {
             0.8f
         }
-        else->{
+
+        else -> {
             1f
         }
     }
@@ -74,8 +80,8 @@ fun PersonListCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
-            .padding(12.dp),
+            .height(75.dp)
+            .padding(horizontal = 12.dp),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(3.dp, YeonOutline),
         colors = CardDefaults.cardColors(
@@ -116,8 +122,12 @@ fun PersonListCard(
                 text = name,
                 color = YeonTextOnBackGround,
                 fontFamily = font_nanum_gyuri,
-                modifier = Modifier.padding(top = 8.dp),
-                fontSize = 24.sp,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .weight(1f),
+                maxLines = 1,
+                fontSize = if(name.length <=4) 24.sp else 12.sp,
+                overflow = TextOverflow.Ellipsis,
                 style = TextStyle(
                     shadow = Shadow(
                         color = Color.Black.copy(alpha = 0.2f),
@@ -126,10 +136,12 @@ fun PersonListCard(
                     )
                 )
             )
-            Spacer(modifier = Modifier.width(30.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Row(
-                modifier = Modifier.padding(top = 8.dp)
-            ){
+                modifier = Modifier.padding(top = 8.dp).width(80.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+            ) {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "",
@@ -151,31 +163,37 @@ fun PersonListCard(
                     )
                 )
             }
-            Spacer(modifier = Modifier.width(50.dp))
-            IconButton(
-                onClick = onExpandClick,
-                modifier = Modifier.size(36.dp).padding(top = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "",
-                    modifier = Modifier.size(36.dp),
-                    tint = YeonOutline_2
-                )
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-            IconButton(
-                onClick = onPinClick,
-                modifier = Modifier
-                    .size(36.dp)
-                    .padding(top = 8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_pin),
-                    contentDescription = "고정 상태 토글",
-                    modifier = Modifier.size(28.dp),
-                    tint = if (isPinned) Color.Black else Color.LightGray.copy(alpha = 0.45f)
-                )
+            Row(
+                modifier = Modifier.width(88.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                IconButton(
+                    onClick = onExpandClick,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .padding(top = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "",
+                        modifier = Modifier.size(36.dp),
+                        tint = YeonOutline_2
+                    )
+                }
+                IconButton(
+                    onClick = onPinClick,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .padding(top = 8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_pin),
+                        contentDescription = "고정 상태 토글",
+                        modifier = Modifier.size(28.dp),
+                        tint = if (isPinned) Color.Black else Color.LightGray.copy(alpha = 0.45f)
+                    )
+                }
             }
         }
     }
