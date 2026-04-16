@@ -60,13 +60,7 @@ fun AppNavHost(
             val personId = backStackEntry.arguments?.getLong("personId") ?: return@composable
 
             DetailPersonScreen(
-                personId = personId,
-                onBackClick = {
-                    navController.popBackStack()
-                },
-                onNavigateToModify = { id ->
-                    navController.navigate(AppRoute.ModifyPerson.createRoute(id))
-                }
+                navController = navController
             )
         }
 
