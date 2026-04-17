@@ -354,4 +354,5 @@ class AddPersonViewModel @Inject constructor(
             _effect.emit(effect)
         }
     }
+
 }

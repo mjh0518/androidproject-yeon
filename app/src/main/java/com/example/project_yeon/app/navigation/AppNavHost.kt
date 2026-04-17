@@ -51,14 +51,8 @@ fun AppNavHost(
 
         composable(
             route = AppRoute.DetailPerson.route,
-            arguments = listOf(
-                navArgument("personId") {
-                    type = NavType.LongType
-                }
-            )
+            arguments = listOf(navArgument("personId") { type = NavType.LongType })
         ) { backStackEntry ->
-            val personId = backStackEntry.arguments?.getLong("personId") ?: return@composable
-
             DetailPersonScreen(
                 navController = navController
             )

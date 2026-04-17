@@ -72,7 +72,7 @@ fun DetailProfileHeader(
                 )
                 DetailHeaderInfoText(
                     label = "성별",
-                    value = person.gender,
+                    value = if(person.gender == "MALE")"남" else "여",
                     fontFamily = fontNanumPen
                 )
                 DetailHeaderInfoText(
@@ -104,7 +104,7 @@ private fun ProfileImageBox(
 ) {
     Surface(
         modifier = modifier
-            .size(width = 92.dp, height = 92.dp),
+            .size(width = 124.dp, height = 124.dp),
         shape = RoundedCornerShape(14.dp),
         color = Color.Transparent,
         border = BorderStroke(2.dp, Color.Black.copy(alpha = 0.75f))

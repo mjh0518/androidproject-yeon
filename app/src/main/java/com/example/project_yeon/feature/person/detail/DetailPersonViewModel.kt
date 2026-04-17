@@ -3,7 +3,10 @@ package com.example.project_yeon.feature.person.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.project_yeon.core.common.result.ResultWrapper
+import com.example.project_yeon.data.local.mapper.toDetailPersonUiModel
 import com.example.project_yeon.domain.person.repository.PersonRepository
+import com.example.project_yeon.domain.person.usecase.GetPersonDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -11,14 +14,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class DetailPersonViewModel @Inject constructor(
+    private val getPersonDetailUseCase: GetPersonDetailUseCase,
     savedStateHandle: SavedStateHandle,
-    // 추후 GetPersonDetailUseCase 주입
-) : ViewModel() {
-
+    ) : ViewModel()
+{
     private val personId: Long = checkNotNull(savedStateHandle["personId"])
     private val _uiState = MutableStateFlow(
         DetailPersonUiState(
@@ -31,6 +35,10 @@ class DetailPersonViewModel @Inject constructor(
 
     private val _effect = MutableSharedFlow<DetailPersonEffect>()
     val effect = _effect.asSharedFlow()
+
+    init {
+        loadPersonDetail()
+    }
 
     fun onEvent(event: DetailPersonEvent) {
         when (event) {
@@ -77,4 +85,28 @@ class DetailPersonViewModel @Inject constructor(
             snsMasked = "@yeon_memory"
         )
     }
+    private fun loadPersonDetail() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null
+            )
+
+            try {
+                val person = getPersonDetailUseCase(personId)
+
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = null,
+                    person = person.toDetailPersonUiModel()
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = e.message ?: "상세 정보를 불러오지 못했습니다."
+                )
+            }
+        }
+    }
 }
+

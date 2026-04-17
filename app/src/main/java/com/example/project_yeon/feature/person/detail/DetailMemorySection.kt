@@ -1,16 +1,14 @@
 package com.example.project_yeon.feature.person.detail
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -48,13 +47,21 @@ fun DetailMemorySection(
     var isRecentTalkExpanded by rememberSaveable { mutableStateOf(false) }
     var isMemoryPhotosExpanded by rememberSaveable { mutableStateOf(false) }
 
+    val lastContactDate = person.lastContactDate?.trim().orEmpty()
+    val recentTalk = person.recentTalk?.trim().orEmpty()
+
+    Log.d("DetailPerson", "memoryImageUris size = ${person.memoryImageUris.size}")
+    person.memoryImageUris.forEachIndexed { index, uri ->
+        Log.d("DetailPerson", "memoryImageUris[$index] = $uri")
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         DetailSimpleInfoText(
             label = "마지막 연락날",
-            value = person.lastContactDate,
+            value = lastContactDate,
             labelFont = fontNanumGyuri,
             valueFont = fontNanumPen
         )
@@ -63,7 +70,7 @@ fun DetailMemorySection(
             title = "기억에 남는 최근 대화",
             expanded = isRecentTalkExpanded,
             onToggle = { isRecentTalkExpanded = !isRecentTalkExpanded },
-            text = person.recentTalk,
+            text = recentTalk,
             titleFont = fontNanumGyuri,
             bodyFont = fontNanumPen
         )

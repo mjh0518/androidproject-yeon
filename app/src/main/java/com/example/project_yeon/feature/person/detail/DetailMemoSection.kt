@@ -20,13 +20,15 @@ import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
 
 @Composable
 fun DetailMemoSection(
-    memo: String,
+    memo: String?,
     modifier: Modifier = Modifier
 ) {
     val fontNanumGyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
     val fontNanumPen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
 
     var isMemoExpanded by rememberSaveable { mutableStateOf(false) }
+
+    val memoText = memo?.trim().orEmpty()
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -42,7 +44,7 @@ fun DetailMemoSection(
         if (isMemoExpanded) {
             MemoryContentBox {
                 Text(
-                    text = if (memo.isBlank()) "작성된 기타 메모가 없습니다." else memo,
+                    text = if (memoText.isBlank()) "작성된 기타 메모가 없습니다." else memoText,
                     color = YeonTextOnBackGround,
                     fontFamily = fontNanumPen,
                     fontSize = 18.sp,

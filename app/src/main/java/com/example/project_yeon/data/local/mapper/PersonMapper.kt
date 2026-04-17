@@ -4,6 +4,7 @@ import com.example.project_yeon.data.local.entity.PersonEntity
 import com.example.project_yeon.domain.person.model.Person
 import com.example.project_yeon.domain.person.model.PersonCreateRequest
 import com.example.project_yeon.domain.person.model.PersonUpdateRequest
+import com.example.project_yeon.feature.person.detail.DetailPersonUiModel
 import org.json.JSONArray
 
 private fun List<String>.toJsonString(): String? {
@@ -137,5 +138,36 @@ fun PersonUpdateRequest.toEntity(old: PersonEntity): PersonEntity {
         pinned = pinned,
 
         updatedAt = System.currentTimeMillis()
+    )
+}
+
+fun Person.toDetailPersonUiModel(): DetailPersonUiModel {
+    return DetailPersonUiModel(
+        id = personId,
+        profileImageUri = profileImageUri,
+        name = name,
+        intimacy = intimacy,
+        gender = gender,
+        birthDate = birthDate,
+        mbti = mbti,
+        personality = personality,
+        personalityDescription = personalityDescription,
+        job = job,
+        firstMetDate = firstMetDate,
+        firstMetPlace = firstMetPlace,
+        likes = likes,
+        dislikes = dislikes,
+        traits = traits,
+        likesDescription = likesDescription,
+        dislikesDescription = dislikesDescription,
+        traitsDescription = traitsDescription,
+        lastContactDate = lastContactDateText,
+        recentMetPlace = recentMetPlace,
+        recentTalk = memorableConversationTalk,
+        memoryImageUris = memoryImageUris,
+        phoneMasked = phoneNumber,
+        addressMasked = livingArea,
+        snsMasked = snsLink,
+        memo = memo,
     )
 }

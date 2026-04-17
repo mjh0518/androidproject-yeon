@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.*
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.project_yeon.R
+import com.example.project_yeon.app.navigation.AppRoute
 import com.example.project_yeon.core.ui.theme.YeonOnPrimary
 import com.example.project_yeon.core.ui.theme.YeonTextMuted
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
@@ -38,6 +40,30 @@ fun DetailPersonScreen(
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                DetailPersonEffect.NavigateBack -> {
+                    navController.popBackStack()
+                }
+
+                is DetailPersonEffect.NavigateToModify -> {
+                    navController.navigate(
+                        AppRoute.ModifyPerson.createRoute(effect.personId)
+                    )
+                }
+
+                DetailPersonEffect.RequestSensitiveAuth -> {
+                    // FR-04에서 처리
+                }
+
+                is DetailPersonEffect.ShowSnackbar -> {
+                    // 필요하면 snackbar 처리
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.paint(

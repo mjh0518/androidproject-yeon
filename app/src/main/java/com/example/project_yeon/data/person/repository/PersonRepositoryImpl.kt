@@ -16,7 +16,7 @@ class PersonRepositoryImpl (
 ) : PersonRepository{
 
     override suspend fun getPerson(id: Long) =
-        personDao.getById(id)?.toDomain()
+        personDao.getById(id)!!.toDomain()
 
     override fun getPersons(): Flow<List<Person>> =
         personDao.getAllFlow().map{entities ->

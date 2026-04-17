@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface PersonRepository {
 
     // 선택한 Person에 대한 정보를 가져올 예정
-    suspend fun getPerson(id: Long): Person?
+    suspend fun getPerson(id: Long): Person
 
     // PersonTable에 있는 각 Person에 대한 정보를 목록으로 가져올 예정
     fun getPersons(): Flow<List<Person>>

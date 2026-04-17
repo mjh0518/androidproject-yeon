@@ -1,5 +1,7 @@
 package com.example.project_yeon.feature.person.add
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -75,6 +77,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.project_yeon.core.common.image.ImageStorageHelper
 import androidx.compose.ui.platform.LocalContext
+import java.io.File
+import java.io.FileOutputStream
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -142,10 +146,12 @@ fun AddPersonScreen(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 20)
     ) { uris: List<Uri> ->
         if (uris.isNotEmpty()) {
+            val savedPaths = uris.mapNotNull { uri ->
+                copyUriToInternalStorage(context, uri)
+            }
+
             viewModel.onEvent(
-                AddPersonEvent.AdditionalInfo.MemoryImagesAdded(
-                    uris.map { it.toString() }
-                )
+                AddPersonEvent.AdditionalInfo.MemoryImagesAdded(savedPaths)
             )
         }
     }
@@ -812,5 +818,30 @@ fun AddPersonScreen(
             },
             Modifier.padding(horizontal = 32.dp), uiState.canSubmit
         )
+    }
+}
+private fun copyUriToInternalStorage(
+    context: Context,
+    uri: Uri
+): String? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+
+        val dir = File(context.filesDir, "memory_images")
+        if (!dir.exists()) dir.mkdirs()
+
+        val fileName = "memory_${System.currentTimeMillis()}.jpg"
+        val file = File(dir, fileName)
+
+        inputStream.use { input ->
+            FileOutputStream(file).use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        file.absolutePath
+    } catch (e: Exception) {
+        Log.e("AddPerson", "copyUriToInternalStorage failed: $uri", e)
+        null
     }
 }

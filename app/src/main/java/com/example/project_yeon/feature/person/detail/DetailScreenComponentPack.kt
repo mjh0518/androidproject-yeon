@@ -1,5 +1,7 @@
 package com.example.project_yeon.feature.person.detail
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,14 +27,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
+import java.io.File
 
 @Composable
 fun DetailSectionTitleRow(
@@ -44,7 +50,9 @@ fun DetailSectionTitleRow(
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
 
     Row(
-        modifier = modifier.fillMaxWidth().padding(start = 24.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 24.dp),
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
@@ -96,7 +104,8 @@ fun DetailPreviewBox(
             color = YeonTextOnBackGround,
             fontFamily = font_nanum_pen,
             fontSize = 18.sp,
-            lineHeight = 24.sp
+            lineHeight = 24.sp,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -125,7 +134,33 @@ fun DetailSimpleInfoText(
             text = if (value.isBlank()) "-" else value,
             color = YeonTextOnBackGround,
             fontFamily = valueFont,
-            fontSize = 20.sp
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun ExpandableInfoBlock(
+    title: String,
+    previewText: String,
+    expandedText: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        DetailSectionTitleRow(
+            title = title,
+            expanded = expanded,
+            onToggle = onToggle,
+        )
+
+        DetailPreviewBox(
+            text = if (expanded) expandedText else previewText,
+            modifier = Modifier.padding(16.dp)
         )
     }
 }
@@ -272,10 +307,12 @@ fun MemoryContentBox(
 }
 
 @Composable
-fun MemoryPhotoItem(
+private fun MemoryPhotoItem(
     imageUri: String,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     Surface(
         modifier = modifier.size(120.dp),
         shape = RoundedCornerShape(14.dp),
@@ -283,7 +320,7 @@ fun MemoryPhotoItem(
         color = Color.White.copy(alpha = 0.7f)
     ) {
         AsyncImage(
-            model = imageUri,
+            model = File(imageUri),
             contentDescription = "함께한 사진",
             modifier = Modifier
                 .size(120.dp)
@@ -312,7 +349,8 @@ fun SensitiveInfoBox(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             SensitiveInfoLine(
                 label = "전화번호",
@@ -348,13 +386,15 @@ fun SensitiveInfoLine(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = label,
             color = YeonTextOnBackGround,
             fontFamily = labelFont,
-            fontSize = 20.sp
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center,
         )
 
         Text(
@@ -362,7 +402,8 @@ fun SensitiveInfoLine(
             color = YeonTextOnBackGround,
             fontFamily = valueFont,
             fontSize = 18.sp,
-            lineHeight = 24.sp
+            lineHeight = 24.sp,
+            textAlign = TextAlign.Center,
         )
     }
 }

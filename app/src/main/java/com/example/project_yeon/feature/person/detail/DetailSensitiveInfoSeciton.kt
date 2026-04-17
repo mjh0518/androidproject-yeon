@@ -1,14 +1,11 @@
 package com.example.project_yeon.feature.person.detail
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +23,10 @@ fun DetailSensitiveInfoSection(
     val fontNanumGyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
     val fontNanumPen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
 
+    val phone = person.phoneMasked?.trim().orEmpty()
+    val address = person.addressMasked?.trim().orEmpty()
+    val sns = person.snsMasked?.trim().orEmpty()
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -40,9 +41,9 @@ fun DetailSensitiveInfoSection(
         )
 
         SensitiveInfoBox(
-            phone = person.phoneMasked,
-            address = person.addressMasked,
-            sns = person.snsMasked,
+            phone = phone,
+            address = address,
+            sns = sns,
             titleFont = fontNanumGyuri,
             bodyFont = fontNanumPen
         )
