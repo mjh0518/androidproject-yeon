@@ -1,11 +1,18 @@
-package com.example.project_yeon.feature.person.add
+package com.example.project_yeon.feature.person.modify
+
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_yeon.core.common.result.ResultWrapper
-import com.example.project_yeon.domain.person.usecase.CreatePersonUseCase
+import com.example.project_yeon.data.local.mapper.toModifyAdditionalInfoState
+import com.example.project_yeon.data.local.mapper.toModifyContactInfoState
+import com.example.project_yeon.data.local.mapper.toModifyCoreInfoState
+import com.example.project_yeon.domain.person.usecase.GetPersonDetailUseCase
+import com.example.project_yeon.domain.person.usecase.ModifyPersonUseCase
 import com.example.project_yeon.domain.person.usecase.ValidatePersonDraftUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -16,22 +23,31 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
-class AddPersonViewModel @Inject constructor(
-    private val createPersonUseCase: CreatePersonUseCase,
+class ModifyPersonViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val getPersonDetailUseCase: GetPersonDetailUseCase,
+    private val modifyPersonUseCase: ModifyPersonUseCase,
     private val validatePersonDraftUseCase: ValidatePersonDraftUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(AddPersonUiState())
-    val uiState: StateFlow<AddPersonUiState> = _uiState.asStateFlow()
+    private val personId: Long = checkNotNull(savedStateHandle["personId"])
 
-    private val _effect = MutableSharedFlow<AddPersonEffect>()
+    private val _uiState = MutableStateFlow(ModifyPersonUiState())
+    val uiState: StateFlow<ModifyPersonUiState> = _uiState.asStateFlow()
+
+    private val _effect = MutableSharedFlow<ModifyPersonEffect>()
     val effect = _effect.asSharedFlow()
 
+    init{
+        loadPerson()
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun onEvent(event: AddPersonEvent) {
+    fun onEvent(event: ModifyPersonEvent) {
         when (event) {
 
-            is AddPersonEvent.CoreInfo.ProfileImageChanged -> {
+            is ModifyPersonEvent.CoreInfo.ProfileImageChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         coreInfo = currentState.coreInfo.copy(
@@ -41,7 +57,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.NameChanged -> {
+            is ModifyPersonEvent.NameChanged -> {
                 _uiState.update {
                     it.copy(
                         coreInfo = it.coreInfo.copy(
@@ -51,7 +67,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.GenderChanged -> {
+            is ModifyPersonEvent.GenderChanged -> {
                 _uiState.update {
                     it.copy(
                         coreInfo = it.coreInfo.copy(
@@ -61,7 +77,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.CoreInfo.BirthDateChanged -> {
+            is ModifyPersonEvent.CoreInfo.BirthDateChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         coreInfo = currentState.coreInfo.copy(
@@ -71,7 +87,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.IntimacyChanged -> {
+            is ModifyPersonEvent.IntimacyChanged -> {
                 _uiState.update {
                     it.copy(
                         coreInfo = it.coreInfo.copy(
@@ -81,7 +97,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.MbtiChanged -> {
+            is ModifyPersonEvent.MbtiChanged -> {
                 _uiState.update {
                     it.copy(
                         coreInfo = it.coreInfo.copy(
@@ -91,7 +107,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.PersonalityChanged -> {
+            is ModifyPersonEvent.PersonalityChanged -> {
                 _uiState.update {
                     it.copy(
                         coreInfo = it.coreInfo.copy(
@@ -101,7 +117,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.PersonalityDescriptionChanged -> {
+            is ModifyPersonEvent.PersonalityDescriptionChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -111,7 +127,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.FirstMetDateChanged -> {
+            is ModifyPersonEvent.FirstMetDateChanged -> {
                 _uiState.update {
                     it.copy(
                         coreInfo = it.coreInfo.copy(
@@ -121,7 +137,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.FirstMetPlaceChanged -> {
+            is ModifyPersonEvent.FirstMetPlaceChanged -> {
                 _uiState.update {
                     it.copy(
                         coreInfo = it.coreInfo.copy(
@@ -131,7 +147,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.LikesChanged -> {
+            is ModifyPersonEvent.LikesChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -141,7 +157,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.LikesDescriptionChanged -> {
+            is ModifyPersonEvent.LikesDescriptionChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -151,7 +167,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.DislikesChanged -> {
+            is ModifyPersonEvent.DislikesChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -161,7 +177,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.DislikesDescriptionChanged -> {
+            is ModifyPersonEvent.DislikesDescriptionChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -171,7 +187,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.TraitsChanged -> {
+            is ModifyPersonEvent.TraitsChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -181,7 +197,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.TraitsDescriptionChanged -> {
+            is ModifyPersonEvent.TraitsDescriptionChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -192,7 +208,7 @@ class AddPersonViewModel @Inject constructor(
             }
 
 
-            is AddPersonEvent.LastContactDateChanged -> {
+            is ModifyPersonEvent.LastContactDateChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -202,7 +218,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.LastRecentMetPlaceChanged -> {
+            is ModifyPersonEvent.LastRecentMetPlaceChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -212,7 +228,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.MemorableConversationTalkChanged -> {
+            is ModifyPersonEvent.MemorableConversationTalkChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -222,7 +238,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.AdditionalInfo.MemoryImagesAdded -> {
+            is ModifyPersonEvent.AdditionalInfo.MemoryImagesAdded -> {
                 updateState { currentState ->
                     val merged = (
                             currentState.additionalInfo.memoryImageUris + event.uris
@@ -236,7 +252,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.AdditionalInfo.MemoryImageRemoved -> {
+            is ModifyPersonEvent.AdditionalInfo.MemoryImageRemoved -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -247,7 +263,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.LivingAreaChanged -> {
+            is ModifyPersonEvent.LivingAreaChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         contactInfo = currentState.contactInfo.copy(
@@ -257,7 +273,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.PhoneNumberChanged -> {
+            is ModifyPersonEvent.PhoneNumberChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         contactInfo = currentState.contactInfo.copy(
@@ -267,7 +283,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.ContactInfo.SnsLinkChanged -> {
+            is ModifyPersonEvent.ContactInfo.SnsLinkChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         contactInfo = currentState.contactInfo.copy(
@@ -277,7 +293,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.JobChanged -> {
+            is ModifyPersonEvent.JobChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -287,7 +303,7 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.MemoChanged -> {
+            is ModifyPersonEvent.MemoChanged -> {
                 updateState { currentState ->
                     currentState.copy(
                         additionalInfo = currentState.additionalInfo.copy(
@@ -297,23 +313,28 @@ class AddPersonViewModel @Inject constructor(
                 }
             }
 
-            is AddPersonEvent.SaveClicked -> {
+            is ModifyPersonEvent.SaveClicked -> {
+                _uiState.update { it.copy(isSaving = true) }
                 val validateResult = validatePersonDraftUseCase(_uiState.value.toDraft())
                 if (!validateResult.isValid) {
-                    viewModelScope.launch {
-                        sendEffect(AddPersonEffect.ShowSnackbar(
-                            validateResult.message ?: "필수 입력값을 확인해주세요."))
+                    _uiState.update {
+                        it.copy(
+                            isSaving = false
+                        )
                     }
+                    sendEffect(ModifyPersonEffect.ShowSnackbar(validateResult.message ?: "필수 입력값을 확인해주세요."))
                     return
                 } else {
-                    val request = _uiState.value.toCreateRequest()
+                    val request = _uiState.value.toUpdateRequest()
                     viewModelScope.launch {
-                        when (val result = createPersonUseCase(request)) {
+                        when (val result = modifyPersonUseCase(request)) {
                             is ResultWrapper.Success -> {
-                                sendEffect(AddPersonEffect.NavigateBack)
+                                _uiState.update { it.copy(isSaving = false) }
+                                sendEffect(ModifyPersonEffect.NavigateBack)
                             }
                             is ResultWrapper.Error -> {
-                                sendEffect(AddPersonEffect.ShowSnackbar("저장에 실패했습니다."))
+                                _uiState.update { it.copy(isSaving = false) }
+                                sendEffect(ModifyPersonEffect.ShowSnackbar("저장에 실패했습니다."))
                             }
                         }
                     }
@@ -321,37 +342,72 @@ class AddPersonViewModel @Inject constructor(
 
             }
 
-            is AddPersonEvent.BackClicked -> {
+            is ModifyPersonEvent.BackClicked -> {
                 val currentState = _uiState.value
 
                 if (currentState.isDirty) {
                     _uiState.value = currentState.copy(showDiscardDialog = true)
                 } else {
-                    sendEffect(AddPersonEffect.NavigateBack)
+                    sendEffect(ModifyPersonEffect.NavigateBack)
                 }
             }
 
-            is AddPersonEvent.ConfirmDiscardClicked -> {
+            is ModifyPersonEvent.ConfirmDiscardClicked -> {
                 _uiState.value = _uiState.value.copy(
                     showDiscardDialog = false
                 )
-                sendEffect(AddPersonEffect.NavigateBack)
+                sendEffect(ModifyPersonEffect.NavigateBack)
             }
 
-            is AddPersonEvent.DiscardCancel -> {
+            is ModifyPersonEvent.DiscardCancel -> {
                 _uiState.value = _uiState.value.copy(showDiscardDialog = false)
             }
         }
     }
 
-    private fun updateState(transform: (AddPersonUiState) -> AddPersonUiState) {
+    private fun updateState(transform: (ModifyPersonUiState) -> ModifyPersonUiState) {
         _uiState.value = transform(_uiState.value)
     }
 
-    private fun sendEffect(effect: AddPersonEffect) {
+    private fun sendEffect(effect: ModifyPersonEffect) {
         viewModelScope.launch {
+            Log.d("ModifyPersonViewModel", "sendEffect = $effect")
             _effect.emit(effect)
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun loadPerson() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null
+            )
+
+            try {
+                val person = getPersonDetailUseCase(personId)
+
+                val core = person.toModifyCoreInfoState()
+                val additional = person.toModifyAdditionalInfoState()
+                val contact = person.toModifyContactInfoState()
+
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = null,
+                    personId = personId,
+                    originalCoreInfo = core,
+                    originalAdditionalInfo = additional,
+                    originalContactInfo = contact,
+                    coreInfo = core,
+                    additionalInfo = additional,
+                    contactInfo = contact
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = e.message ?: "수정할 인연 정보를 불러오지 못했습니다."
+                )
+            }
+        }
+    }
 }

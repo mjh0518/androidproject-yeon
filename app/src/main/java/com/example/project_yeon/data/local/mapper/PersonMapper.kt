@@ -1,11 +1,19 @@
 package com.example.project_yeon.data.local.mapper
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.project_yeon.data.local.entity.PersonEntity
 import com.example.project_yeon.domain.person.model.Person
 import com.example.project_yeon.domain.person.model.PersonCreateRequest
 import com.example.project_yeon.domain.person.model.PersonUpdateRequest
+import com.example.project_yeon.feature.person.add.model.ProfileImageState
 import com.example.project_yeon.feature.person.detail.DetailPersonUiModel
+import com.example.project_yeon.domain.person.model.common.Gender
+import com.example.project_yeon.feature.person.modify.ModifyPersonAdditionalInfoState
+import com.example.project_yeon.feature.person.modify.ModifyPersonContractInfoState
+import com.example.project_yeon.feature.person.modify.ModifyPersonCoreInfoState
 import org.json.JSONArray
+import java.time.LocalDate
 
 private fun List<String>.toJsonString(): String? {
     return if (isEmpty()) null else JSONArray(this).toString()
@@ -170,4 +178,61 @@ fun Person.toDetailPersonUiModel(): DetailPersonUiModel {
         snsMasked = snsLink,
         memo = memo,
     )
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun Person.toModifyCoreInfoState(): ModifyPersonCoreInfoState {
+    return ModifyPersonCoreInfoState(
+        profileImageUri = profileImageUri
+            ?.let { ProfileImageState.Custom(it) }
+            ?: ProfileImageState.Default,
+        name = name,
+        gender = gender.toModifyGender(),
+        birthDate = birthDate.toLocalDateOrNull(),
+        intimacy = intimacy,
+        mbti = mbti,
+        personality = personality,
+        firstMetDate = firstMetDate,
+        firstMetPlace = firstMetPlace
+    )
+}
+
+fun Person.toModifyAdditionalInfoState(): ModifyPersonAdditionalInfoState {
+    return ModifyPersonAdditionalInfoState(
+        personalityDescription = personalityDescription ?: "",
+        likes = likes,
+        likesDescription = likesDescription ?: "",
+        dislikes = dislikes,
+        dislikesDescription = dislikesDescription ?: "",
+        traits = traits,
+        traitsDescription = traitsDescription ?: "",
+        lastContactDateText = lastContactDateText ?: "",
+        recentMetPlace = recentMetPlace ?: "",
+        memorableConversationTalk = memorableConversationTalk?: "",
+        memoryImageUris = memoryImageUris,
+        job = job ?: "",
+        memo = memo?: ""
+    )
+}
+
+fun Person.toModifyContactInfoState(): ModifyPersonContractInfoState {
+    return ModifyPersonContractInfoState(
+        livingArea = livingArea?: "",
+        phoneNumber = phoneNumber?: "",
+        snsLink = snsLink?: ""
+    )
+}
+
+private fun String.toModifyGender(): Gender? {
+    return when (this) {
+        "MALE" -> Gender.MALE
+        "FEMALE" -> Gender.FEMALE
+        else -> null
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+private fun String?.toLocalDateOrNull(): LocalDate? {
+    if (this.isNullOrBlank()) return null
+    return runCatching { LocalDate.parse(this) }.getOrNull()
 }

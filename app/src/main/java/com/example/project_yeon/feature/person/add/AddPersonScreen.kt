@@ -1,7 +1,6 @@
 package com.example.project_yeon.feature.person.add
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -77,6 +76,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.project_yeon.core.common.image.ImageStorageHelper
 import androidx.compose.ui.platform.LocalContext
+import com.example.project_yeon.domain.person.model.common.Gender
 import java.io.File
 import java.io.FileOutputStream
 

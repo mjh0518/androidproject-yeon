@@ -65,17 +65,11 @@ fun AppNavHost(
                     type = NavType.LongType
                 }
             )
-        ) { backStackEntry ->
-            val personId = backStackEntry.arguments?.getLong("personId") ?: return@composable
-
+        ) {
             ModifyPersonScreen(
-                personId = personId,
-                onBackClick = {
-                    navController.popBackStack()
-                }
+                navController = navController
             )
         }
-
         composable(AppRoute.Trash.route) {
             TrashScreen(
                 onBackClick = {

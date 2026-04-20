@@ -13,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
@@ -41,6 +43,20 @@ fun DetailPersonScreen(
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
     val uiState by viewModel.uiState.collectAsState()
 
+    val currentBackStackEntry = navController.currentBackStackEntry
+    val updated by currentBackStackEntry
+        ?.savedStateHandle
+        ?.getStateFlow("person_updated", false)
+        ?.collectAsState()
+        ?: remember { mutableStateOf(false) }
+
+    LaunchedEffect(updated) {
+        if (updated) {
+            viewModel.reloadPersonDetail()
+            currentBackStackEntry?.savedStateHandle?.set("person_updated", false)
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
@@ -50,7 +66,7 @@ fun DetailPersonScreen(
 
                 is DetailPersonEffect.NavigateToModify -> {
                     navController.navigate(
-                        AppRoute.ModifyPerson.createRoute(effect.personId)
+                        "modify_person/${effect.personId}"
                     )
                 }
 

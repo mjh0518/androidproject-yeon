@@ -54,7 +54,9 @@ class DetailPersonViewModel @Inject constructor(
             }
         }
     }
-
+    fun reloadPersonDetail() {
+        loadPersonDetail()
+    }
     private fun emitEffect(effect: DetailPersonEffect) {
         viewModelScope.launch { _effect.emit(effect) }
     }

@@ -1,13 +1,11 @@
-package com.example.project_yeon.feature.person.add
-
-import com.example.project_yeon.domain.person.model.PersonCreateRequest
+package com.example.project_yeon.feature.person.modify
 import com.example.project_yeon.domain.person.model.PersonDraft
+import com.example.project_yeon.domain.person.model.PersonUpdateRequest
 import com.example.project_yeon.domain.person.model.common.Gender
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
-import kotlinx.serialization.descriptors.SerialDescriptor
 import java.time.LocalDate
-data class AddPersonCoreInfoState(
-    val profileImageUri : ProfileImageState = ProfileImageState.Default,
+data class ModifyPersonCoreInfoState(
+    val profileImageUri: ProfileImageState = ProfileImageState.Default,
     val name: String = "",
     val gender: Gender? = null,
     val birthDate: LocalDate? = null,
@@ -28,7 +26,7 @@ data class AddPersonCoreInfoState(
                 firstMetPlace.isNotBlank() ||
                 profileImageUri !is ProfileImageState.Default
 }
-data class AddPersonAdditionalInfoState(
+data class ModifyPersonAdditionalInfoState(
     val personalityDescription: String = "",
     val likes: List<String> = emptyList(),
     val likesDescription : String = "",
@@ -58,7 +56,7 @@ data class AddPersonAdditionalInfoState(
                 memo.isNotBlank()
 }
 
-data class AddPersonContractInfoState(
+data class ModifyPersonContractInfoState(
     val livingArea: String = "",
     val phoneNumber: String = "",
     val snsLink: String = "",){
@@ -68,28 +66,47 @@ data class AddPersonContractInfoState(
                 snsLink.isNotBlank()
 }
 
-data class AddPersonUiState(
-    val coreInfo: AddPersonCoreInfoState = AddPersonCoreInfoState(),
-    val additionalInfo: AddPersonAdditionalInfoState = AddPersonAdditionalInfoState(),
-    val contactInfo: AddPersonContractInfoState = AddPersonContractInfoState(),
+data class ModifyPersonUiState(
+    val personId : Long? = null,
+    val originalCoreInfo: ModifyPersonCoreInfoState? = null,
+    val originalAdditionalInfo: ModifyPersonAdditionalInfoState? = null,
+    val originalContactInfo: ModifyPersonContractInfoState? = null,
+
+    val coreInfo: ModifyPersonCoreInfoState = ModifyPersonCoreInfoState(),
+    val additionalInfo: ModifyPersonAdditionalInfoState = ModifyPersonAdditionalInfoState(),
+    val contactInfo: ModifyPersonContractInfoState = ModifyPersonContractInfoState(),
+
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null,
+    val isSaving: Boolean = false,
     val showDiscardDialog: Boolean = false,
-){
-    val canSubmit: Boolean
-        get() = coreInfo.name.isNotBlank() &&
-        coreInfo.gender != null &&
-        coreInfo.birthDate != null &&
-        coreInfo.mbti.isNotBlank() &&
-        coreInfo.personality.isNotBlank() &&
-        coreInfo.firstMetDate != null &&
-        coreInfo.firstMetPlace.isNotBlank()
-
+) {
     val isDirty: Boolean
-        get() = coreInfo.isDirty ||
-                additionalInfo.isDirty ||
-                contactInfo.isDirty
+        get() = personId != null &&
+                originalCoreInfo != null &&
+                originalAdditionalInfo != null &&
+                originalContactInfo != null &&
+                (
+                        coreInfo != originalCoreInfo ||
+                                additionalInfo != originalAdditionalInfo ||
+                                contactInfo != originalContactInfo
+                        )
 
-    fun toCreateRequest() : PersonCreateRequest {
-        return PersonCreateRequest(
+    val isValid: Boolean
+        get() = coreInfo.name.isNotBlank() &&
+                coreInfo.gender != null &&
+                coreInfo.birthDate != null &&
+                coreInfo.mbti.isNotBlank() &&
+                coreInfo.personality.isNotBlank() &&
+                coreInfo.firstMetDate.isNotBlank() &&
+                coreInfo.firstMetPlace.isNotBlank()
+
+    val canSubmit: Boolean
+        get() = isValid && isDirty && !isLoading && !isSaving
+
+    fun toUpdateRequest(): PersonUpdateRequest {
+        return PersonUpdateRequest(
+            personId = personId ?: error("personId is required"),
             name = coreInfo.name.trim(),
             gender = coreInfo.gender?.name.orEmpty(),
             birthDate = coreInfo.birthDate?.toString().orEmpty(),
@@ -97,31 +114,28 @@ data class AddPersonUiState(
             mbti = coreInfo.mbti,
             personality = coreInfo.personality,
             personalityDescription = additionalInfo.personalityDescription,
-            firstMetDate = coreInfo.firstMetDate,
+            firstMetDate = coreInfo.firstMetDate.trim(),
             firstMetPlace = coreInfo.firstMetPlace.trim(),
-
             likes = additionalInfo.likes,
             likesDescription = additionalInfo.likesDescription,
             dislikes = additionalInfo.dislikes,
             dislikesDescription = additionalInfo.dislikesDescription,
             traits = additionalInfo.traits,
             traitsDescription = additionalInfo.traitsDescription,
-
             lastContactDateText = additionalInfo.lastContactDateText,
             recentMetPlace = additionalInfo.recentMetPlace,
             memorableConversationTalk = additionalInfo.memorableConversationTalk,
             memoryImageUris = additionalInfo.memoryImageUris,
-
             livingArea = contactInfo.livingArea,
             phoneNumber = contactInfo.phoneNumber,
             snsLink = contactInfo.snsLink,
             job = additionalInfo.job,
             memo = additionalInfo.memo,
-
             profileImageUri = when (val image = coreInfo.profileImageUri) {
                 is ProfileImageState.Custom -> image.uri
                 ProfileImageState.Default -> null
-            }
+            },
+            pinned = false
         )
     }
     fun toDraft(): PersonDraft {
@@ -137,74 +151,60 @@ data class AddPersonUiState(
         )
     }
 
-
-    fun AddPersonUiState.toDraft(): PersonDraft {
-        return PersonDraft(
-            name = coreInfo.name,
-            gender = coreInfo.gender,
-            birthDate = coreInfo.birthDate,
-            intimacy = coreInfo.intimacy,
-            mbti = coreInfo.mbti,
-            personality = coreInfo.personality,
-            firstMetDate = coreInfo.firstMetDate,
-            firstMetPlace = coreInfo.firstMetPlace
-        )
-    }
-
 }
 
-sealed interface AddPersonEvent {
-    sealed interface CoreInfo : AddPersonEvent {
+
+sealed interface ModifyPersonEvent {
+    sealed interface CoreInfo : ModifyPersonEvent {
         data class ProfileImageChanged(val image: ProfileImageState) : CoreInfo
         data class BirthDateChanged(val value: LocalDate) : CoreInfo
     }
     //CoreInfo Event
-    data class NameChanged(val value: String) : AddPersonEvent
-    data class GenderChanged(val value: Gender) : AddPersonEvent
-    data class IntimacyChanged(val value: Int) : AddPersonEvent
-    data class MbtiChanged(val value: String) : AddPersonEvent
-    data class PersonalityChanged(val value: String) : AddPersonEvent
-    data class FirstMetDateChanged(val value: String) : AddPersonEvent
-    data class FirstMetPlaceChanged(val value: String) : AddPersonEvent
+    data class NameChanged(val value: String) : ModifyPersonEvent
+    data class GenderChanged(val value: Gender) : ModifyPersonEvent
+    data class IntimacyChanged(val value: Int) : ModifyPersonEvent
+    data class MbtiChanged(val value: String) : ModifyPersonEvent
+    data class PersonalityChanged(val value: String) : ModifyPersonEvent
+    data class FirstMetDateChanged(val value: String) : ModifyPersonEvent
+    data class FirstMetPlaceChanged(val value: String) : ModifyPersonEvent
 
 
     //Addi~Contact Info Chagned
 
-    data class LikesChanged(val value: List<String>) : AddPersonEvent
-    data class LikesDescriptionChanged(val value: String) : AddPersonEvent
-    data class DislikesChanged(val value: List<String>) : AddPersonEvent
-    data class DislikesDescriptionChanged(val value: String) : AddPersonEvent
-    data class TraitsChanged(val value: List<String>) : AddPersonEvent
-    data class TraitsDescriptionChanged(val value: String) : AddPersonEvent
-    data class PersonalityDescriptionChanged(val value: String) : AddPersonEvent
-    data class LastContactDateChanged(val value: String) : AddPersonEvent
-    data class LastRecentMetPlaceChanged(val value : String) : AddPersonEvent
-    data class MemorableConversationTalkChanged(val value : String) : AddPersonEvent
+    data class LikesChanged(val value: List<String>) : ModifyPersonEvent
+    data class LikesDescriptionChanged(val value: String) : ModifyPersonEvent
+    data class DislikesChanged(val value: List<String>) : ModifyPersonEvent
+    data class DislikesDescriptionChanged(val value: String) : ModifyPersonEvent
+    data class TraitsChanged(val value: List<String>) : ModifyPersonEvent
+    data class TraitsDescriptionChanged(val value: String) : ModifyPersonEvent
+    data class PersonalityDescriptionChanged(val value: String) : ModifyPersonEvent
+    data class LastContactDateChanged(val value: String) : ModifyPersonEvent
+    data class LastRecentMetPlaceChanged(val value : String) : ModifyPersonEvent
+    data class MemorableConversationTalkChanged(val value : String) : ModifyPersonEvent
 
-    sealed interface AdditionalInfo : AddPersonEvent {
+    sealed interface AdditionalInfo : ModifyPersonEvent {
         data class MemoryImagesAdded(val uris: List<String>) : AdditionalInfo
         data class MemoryImageRemoved(val uri: String) : AdditionalInfo
     }
-    data class LivingAreaChanged(val value: String) : AddPersonEvent
-    data class PhoneNumberChanged(val value : String) : AddPersonEvent
-    sealed interface ContactInfo : AddPersonEvent {
+    data class LivingAreaChanged(val value: String) : ModifyPersonEvent
+    data class PhoneNumberChanged(val value : String) : ModifyPersonEvent
+    sealed interface ContactInfo : ModifyPersonEvent {
         data class SnsLinkChanged(val value: String) : ContactInfo
     }
-    data class JobChanged(val value: String) : AddPersonEvent
-    data class MemoChanged(val value: String) : AddPersonEvent
+    data class JobChanged(val value: String) : ModifyPersonEvent
+    data class MemoChanged(val value: String) : ModifyPersonEvent
 
-    data object SaveClicked : AddPersonEvent
+    data object SaveClicked : ModifyPersonEvent
 
-    data object BackClicked : AddPersonEvent
-    data object ConfirmDiscardClicked : AddPersonEvent
-    data object DiscardCancel : AddPersonEvent
+    data object BackClicked : ModifyPersonEvent
+    data object ConfirmDiscardClicked : ModifyPersonEvent
+    data object DiscardCancel : ModifyPersonEvent
 }
 
-sealed interface AddPersonEffect {
-    data class ShowSnackbar(val message: String) : AddPersonEffect
-    data object NavigateBack : AddPersonEffect
-    data object LaunchProfileImagePicker : AddPersonEffect
-    data object LaunchMemoryImagePicker : AddPersonEffect
+sealed interface ModifyPersonEffect {
+    data class ShowSnackbar(val message: String) : ModifyPersonEffect
+    data object NavigateBack : ModifyPersonEffect
+    data object LaunchProfileImagePicker : ModifyPersonEffect
+    data object LaunchMemoryImagePicker : ModifyPersonEffect
 }
-
 
