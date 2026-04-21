@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.project_yeon.domain.person.usecase.ObservePersonListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,14 +25,15 @@ class HomeListViewModel @Inject constructor(
     private val _effect = MutableSharedFlow<HomeListEffect>()
     val effect = _effect.asSharedFlow()
 
-
+    private var observePersonsJob: Job? = null
 
     init{
         observePersons()
     }
 
-    private fun observePersons(){
-        viewModelScope.launch {
+    private fun observePersons() {
+        observePersonsJob?.cancel()
+        observePersonsJob = viewModelScope.launch {
             Log.d("HomeListVM", "observePersons start")
 
             observePersonListUseCase()
@@ -48,13 +50,32 @@ class HomeListViewModel @Inject constructor(
                         )
                     }
                 }
-                .collect{ personList ->
+                .collect { personList ->
                     Log.d("HomeListVM", "collect success, size=${personList.size}")
 
-                    _uiState.update{ currentState ->
+                    _uiState.update { currentState ->
+                        val normalizedQuery = currentState.searchQuery.trim()
+
+                        val updatedSearchItems =
+                            if (currentState.isSearchMode) {
+                                if (normalizedQuery.isBlank()) {
+                                    personList
+                                } else {
+                                    personList.filter { item ->
+                                        item.name.contains(normalizedQuery, ignoreCase = true)
+                                    }
+                                }
+                            } else {
+                                emptyList()
+                            }
+
                         currentState.copy(
                             isLoading = false,
                             persons = personList,
+                            searchItems = updatedSearchItems,
+                            isSearchResultEmpty = currentState.isSearchMode &&
+                                    normalizedQuery.isNotBlank() &&
+                                    updatedSearchItems.isEmpty(),
                             errorMessage = null
                         )
                     }
@@ -91,13 +112,56 @@ class HomeListViewModel @Inject constructor(
                         pinnedPersonIds = updatedPinnedIds
                     )
                 }
-
                 //TODO: 고정 기능 구현
             }
 
             is HomeListEvent.OnMoreDetailClick -> {
                 viewModelScope.launch {
                     _effect.emit(HomeListEffect.NavigateToDetail(event.personId))
+                }
+            }
+            is HomeListEvent.OnSearchIconButtonClicked -> {
+                _uiState.update {
+                    if (it.isSearchMode) {
+                        it.copy(
+                            isSearchMode = false,
+                            searchQuery = "",
+                            searchItems = emptyList(),
+                            isSearchResultEmpty = false,
+                            expandedPersonId = null
+                        )
+                    } else {
+                        it.copy(
+                            isSearchMode = true,
+                            searchQuery = "",
+                            searchItems = it.persons,
+                            isSearchResultEmpty = false,
+                            expandedPersonId = null
+                        )
+                    }
+                }
+            }
+            is HomeListEvent.OnSearchQueryChanged -> {
+                updateSearchResults(event.query)
+            }
+            is HomeListEvent.OnSearchClearClicked -> {
+                _uiState.update {
+                    it.copy(
+                        searchQuery = "",
+                        searchItems = it.persons,
+                        isSearchResultEmpty = false
+                    )
+                }
+            }
+            is HomeListEvent.OnSearchCloseClicked -> {
+                _uiState.update {
+                    it.copy(
+                        isSearchMode = false,
+                        searchQuery = "",
+                        searchItems = emptyList(),
+                        isSearchResultEmpty = false,
+                        expandedPersonId = null
+                    )
                 }
             }
         }
@@ -111,5 +175,24 @@ class HomeListViewModel @Inject constructor(
             )
         }
         observePersons()
+    }
+    private fun updateSearchResults(query: String) {
+        val source = _uiState.value.persons
+
+        val result = if (query.isBlank()) {
+            source
+        } else {
+            source.filter { item ->
+                item.name.contains(query.trim(), ignoreCase = true)
+            }
+        }
+
+        _uiState.update {
+            it.copy(
+                searchQuery = query,
+                searchItems = result,
+                isSearchResultEmpty = query.isNotBlank() && result.isEmpty()
+            )
+        }
     }
 }

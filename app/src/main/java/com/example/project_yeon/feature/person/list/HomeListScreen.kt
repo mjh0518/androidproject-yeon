@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
@@ -37,15 +38,16 @@ fun HomeListScreen(
     viewModel: HomeListViewModel = hiltViewModel(),
 ) {
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
-    val font_nanum_gyuri= FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
+    val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is HomeListEffect.NavigateToAdd ->{
+                is HomeListEffect.NavigateToAdd -> {
                     navController.navigate("add_person")
                 }
+
                 is HomeListEffect.NavigateToDetail -> {
                     navController.navigate("detail_Person/${effect.personId}")
                 }
@@ -53,7 +55,7 @@ fun HomeListScreen(
         }
     }
 
-    when{
+    when {
         uiState.isLoading -> {
             Box(
                 modifier = Modifier
@@ -85,6 +87,7 @@ fun HomeListScreen(
                 }
             }
         }
+
         uiState.errorMessage != null -> {
             Box(
                 modifier = Modifier
@@ -168,7 +171,8 @@ fun HomeListScreen(
                 }
             }
         }
-        uiState.isEmpty ->{
+
+        uiState.isEmpty -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -186,12 +190,13 @@ fun HomeListScreen(
                 ) {
                     Spacer(modifier = Modifier.height(128.dp))
                     Button(
-                        onClick = {viewModel.onEvent(HomeListEvent.OnAddClick)},
+                        onClick = { viewModel.onEvent(HomeListEvent.OnAddClick) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = YeonTextMuted,),
+                            containerColor = YeonTextMuted,
+                        ),
                         modifier = Modifier.padding(24.dp),
                         shape = RoundedCornerShape(24.dp),
-                    ){
+                    ) {
                         Text(
                             text = "인연 추가하기",
                             color = YeonOnPrimary,
@@ -202,7 +207,14 @@ fun HomeListScreen(
                 }
             }
         }
+
         else -> {
+            val visiblePersons = if (uiState.isSearchMode) {
+                uiState.searchItems
+            } else {
+                uiState.persons
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -213,9 +225,16 @@ fun HomeListScreen(
                     .systemBarsPadding(),
             ) {
                 HomeListHeader(
+                    title = if (uiState.isSearchMode) "인연 찾기" else "소중한 인연들",
                     fontNanumPen = font_nanum_pen,
-                    onNavigateToAdd = {viewModel.onEvent(HomeListEvent.OnAddClick)}
+                    onNavigateToAdd = {
+                        viewModel.onEvent(HomeListEvent.OnAddClick)
+                    },
+                    onSearchClick = {
+                        viewModel.onEvent(HomeListEvent.OnSearchIconButtonClicked)
+                    }
                 )
+
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -223,69 +242,74 @@ fun HomeListScreen(
                     thickness = 3.dp,
                     color = YeonTextOnBackGround.copy(alpha = 0.25f)
                 )
-                LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
-                    items(
-                        items = uiState.persons,
-                        key = { it.personId }
-                    ) { person ->
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            PersonListCard(
-                                profileimage = person.profileImageUri,
-                                name = person.name,
-                                intimacy = person.intimacy,
-                                isExpanded = uiState.expandedPersonId == person.personId,
-                                isPinned = uiState.pinnedPersonIds.contains(person.personId),
-                                onExpandClick = {
-                                    viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
-                                },
-                                onPinClick = {
-                                    viewModel.onEvent(HomeListEvent.OnPinClick(person.personId))
-                                }
-                            )
 
-                            if (uiState.expandedPersonId == person.personId) {
-                                PersonExpandedSection(
-                                    person = person,
-                                    onMoreDetailClick = {
-                                        viewModel.onEvent(HomeListEvent.OnMoreDetailClick(person.personId))
+                if (uiState.isSearchMode) {
+                    Spacer(modifier = Modifier.padding())
+
+                    HomeListSearchHeader(
+                        query = uiState.searchQuery,
+                        onQueryChange = { query ->
+                            viewModel.onEvent(HomeListEvent.OnSearchQueryChanged(query))
+                        },
+                        onClearClick = {
+                            viewModel.onEvent(HomeListEvent.OnSearchClearClicked)
+                        },
+                        onCloseClick = {
+                            viewModel.onEvent(HomeListEvent.OnSearchCloseClicked)
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    SearchResultSummary(
+                        query = uiState.searchQuery,
+                        resultCount = visiblePersons.size,
+                        modifier = Modifier.padding(8.dp).align(Alignment.CenterHorizontally)
+                    )
+                }
+
+                if (uiState.isSearchMode && uiState.isSearchResultEmpty) {
+                    EmptySearchResultView(
+                        query = uiState.searchQuery,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        items(
+                            items = visiblePersons,
+                            key = { it.personId }
+                        ) { person ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                PersonListCard(
+                                    profileimage = person.profileImageUri,
+                                    name = person.name,
+                                    intimacy = person.intimacy,
+                                    isExpanded = uiState.expandedPersonId == person.personId,
+                                    isPinned = uiState.pinnedPersonIds.contains(person.personId),
+                                    onExpandClick = {
+                                        viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
+                                    },
+                                    onPinClick = {
+                                        viewModel.onEvent(HomeListEvent.OnPinClick(person.personId))
                                     }
                                 )
-                            }
-                        }
-                    }
-                    /*
-                    items(
-                        items = uiState.persons,
-                        key = { it.personId }
-                    ) { person ->
-                        Log.d("HomeListImage", "profileImageUri = ${person.profileImageUri}")
-                        PersonListCard(
-                            profileimage = person.profileImageUri,
-                            name = person.name,
-                            intimacy = person.intimacy,
-                            isExpanded = uiState.expandedPersonId == person.personId,
-                            isPinned = uiState.pinnedPersonIds.contains(person.personId),
-                            onExpandClick = {
-                                viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
-                            },
-                            onPinClick = {
-                                viewModel.onEvent(HomeListEvent.OnPinClick(person.personId))
-                            }
-                        )
-                        if (uiState.expandedPersonId == person.personId) {
-                            PersonExpandedSection(
-                                person = person,
-                                onMoreDetailClick = {
-                                    viewModel.onEvent(HomeListEvent.OnMoreDetailClick(person.personId))
+
+                                if (uiState.expandedPersonId == person.personId) {
+                                    PersonExpandedSection(
+                                        person = person,
+                                        onMoreDetailClick = {
+                                            viewModel.onEvent(HomeListEvent.OnMoreDetailClick(person.personId))
+                                        }
+                                    )
                                 }
-                            )
+                            }
                         }
                     }
-                    */
                 }
             }
         }

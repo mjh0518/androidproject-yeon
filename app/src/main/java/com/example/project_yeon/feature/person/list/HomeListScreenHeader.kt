@@ -32,6 +32,7 @@ import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
 
 @Composable
 fun HomeListHeader(
+    title : String,
     fontNanumPen: FontFamily,
     onNavigateToAdd: () -> Unit,
     onSearchClick: () -> Unit = {},
@@ -47,7 +48,7 @@ fun HomeListHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            "소중한 인연들",
+            text = title,
             color = YeonTextOnBackGround,
             fontFamily = fontNanumPen,
             fontSize = 32.sp,
