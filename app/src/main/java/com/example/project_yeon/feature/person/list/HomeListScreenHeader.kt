@@ -1,6 +1,7 @@
 package com.example.project_yeon.feature.person.list
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -34,9 +37,13 @@ import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
 fun HomeListHeader(
     title : String,
     fontNanumPen: FontFamily,
+    isSortMenuVisible : Boolean,
+    currentSortType: SortType,
     onNavigateToAdd: () -> Unit,
     onSearchClick: () -> Unit = {},
     onSortClick: () -> Unit = {},
+    onSortDismiss: () -> Unit = {},
+    onSortTypeSelected: (SortType) -> Unit = {},
     onDeleteClick: () -> Unit = {},
     onRecoveryClick: () -> Unit = {},
 ){
@@ -79,12 +86,20 @@ fun HomeListHeader(
                     contentDescription = "인연 검색",
                     onClick = onSearchClick
                 )
-                HeaderActionIcon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "인연 정렬",
-                    onClick = onSortClick
-                )
-
+                Box {
+                    HeaderActionIcon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "인연 정렬",
+                        onClick = onSortClick
+                    )
+                    SortDropdownMenu(
+                        expanded = isSortMenuVisible,
+                        currentSortType = currentSortType,
+                        fontNanumPen = fontNanumPen,
+                        onDismissRequest = onSortDismiss,
+                        onSortTypeSelected = onSortTypeSelected
+                    )
+                }
             }
 
             HeaderGroupDivider()

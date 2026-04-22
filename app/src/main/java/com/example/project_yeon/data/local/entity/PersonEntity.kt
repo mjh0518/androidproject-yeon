@@ -48,6 +48,6 @@ data class PersonEntity(
     val memo: String?,                      // 기타 메모
 
     val pinned: Boolean = false,
-    val createdAt: Long,
+    val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long
 )

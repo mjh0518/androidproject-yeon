@@ -29,5 +29,6 @@ data class PersonCreateRequest(
     val job: String,
     val memo: String,
 
-    val profileImageUri: String?
+    val profileImageUri: String?,
+    val createdAt: Long = System.currentTimeMillis()
 )

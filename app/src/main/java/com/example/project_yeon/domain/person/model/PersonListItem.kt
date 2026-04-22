@@ -14,5 +14,6 @@ data class PersonListItem(
     val recentMeetPlaceText: String?,
     val genderText: String?,
     val personalityText: String?,
-    val lastContactDateText: String?
+    val lastContactDateText: String?,
+    val createdAt: Long,
 )

@@ -2,6 +2,15 @@ package com.example.project_yeon.feature.person.list
 
 import com.example.project_yeon.domain.person.model.PersonListItem
 
+enum class SortType(
+    val label: String
+) {
+    NEWEST("최신 추가순"),
+    OLDEST("오래된 순"),
+    CLOSENESS_DESC("친밀도 높은 순"),
+    NAME_ASC("이름 순")
+}
+
 
 data class HomeListState(
     val isLoading: Boolean = true,
@@ -14,6 +23,9 @@ data class HomeListState(
     val searchQuery : String = "",
     val searchItems : List<PersonListItem> = emptyList(),
     val isSearchResultEmpty : Boolean = false,
+
+    val isSortMenuVisible : Boolean = false,
+    val currentSortType: SortType = SortType.NEWEST,
 
 ) {
     val isEmpty: Boolean
@@ -30,6 +42,10 @@ sealed interface HomeListEvent {
     data class OnSearchQueryChanged(val query : String) : HomeListEvent
     data object OnSearchClearClicked : HomeListEvent
     data object OnSearchCloseClicked : HomeListEvent
+
+    data object OnSortIconClicked : HomeListEvent
+    data class OnSortTypeSelected(val sortType: SortType) : HomeListEvent
+    data object OnSortMenuDismissed : HomeListEvent
 }
 
 sealed interface HomeListEffect {

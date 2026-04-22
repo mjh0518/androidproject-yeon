@@ -24,7 +24,8 @@ class ObservePersonListUseCase@Inject constructor(
                     personalityText = person.personality,
                     jobText = person.job,
                     recentMeetPlaceText = person.recentMetPlace,
-                    lastContactDateText = person.lastContactDateText
+                    lastContactDateText = person.lastContactDateText,
+                    createdAt = person.createdAt,
                 )
             }
         }

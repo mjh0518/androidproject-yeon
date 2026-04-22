@@ -4,7 +4,6 @@ import com.example.project_yeon.domain.person.model.PersonCreateRequest
 import com.example.project_yeon.domain.person.model.PersonDraft
 import com.example.project_yeon.domain.person.model.common.Gender
 import com.example.project_yeon.feature.person.add.model.ProfileImageState
-import kotlinx.serialization.descriptors.SerialDescriptor
 import java.time.LocalDate
 data class AddPersonCoreInfoState(
     val profileImageUri : ProfileImageState = ProfileImageState.Default,
@@ -121,7 +120,8 @@ data class AddPersonUiState(
             profileImageUri = when (val image = coreInfo.profileImageUri) {
                 is ProfileImageState.Custom -> image.uri
                 ProfileImageState.Default -> null
-            }
+            },
+            createdAt = System.currentTimeMillis()
         )
     }
     fun toDraft(): PersonDraft {

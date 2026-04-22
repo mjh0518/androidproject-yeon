@@ -227,12 +227,33 @@ fun HomeListScreen(
                 HomeListHeader(
                     title = if (uiState.isSearchMode) "인연 찾기" else "소중한 인연들",
                     fontNanumPen = font_nanum_pen,
+                    isSortMenuVisible = uiState.isSortMenuVisible,
+                    currentSortType = uiState.currentSortType,
                     onNavigateToAdd = {
                         viewModel.onEvent(HomeListEvent.OnAddClick)
                     },
                     onSearchClick = {
                         viewModel.onEvent(HomeListEvent.OnSearchIconButtonClicked)
-                    }
+                    },
+                    onSortClick = {
+                        viewModel.onEvent(HomeListEvent.OnSortIconClicked)
+                    },
+                    onSortDismiss = {
+                        viewModel.onEvent(HomeListEvent.OnSortMenuDismissed)
+                    },
+                    onSortTypeSelected = { sortType ->
+                        viewModel.onEvent(HomeListEvent.OnSortTypeSelected(sortType))
+                        Log.d(
+                            "HomeListSort",
+                            "currentSortType=${uiState.currentSortType}, personsSize=${uiState.persons.size}"
+                        )
+                    },
+                    onDeleteClick = {
+                        // TODO
+                    },
+                    onRecoveryClick = {
+                        // TODO
+                    },
                 )
 
                 HorizontalDivider(
@@ -263,7 +284,9 @@ fun HomeListScreen(
                     SearchResultSummary(
                         query = uiState.searchQuery,
                         resultCount = visiblePersons.size,
-                        modifier = Modifier.padding(8.dp).align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .align(Alignment.CenterHorizontally)
                     )
                 }
 

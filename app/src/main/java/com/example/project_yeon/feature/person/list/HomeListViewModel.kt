@@ -3,6 +3,7 @@ package com.example.project_yeon.feature.person.list
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.project_yeon.domain.person.model.PersonListItem
 import com.example.project_yeon.domain.person.usecase.ObservePersonListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -54,14 +55,19 @@ class HomeListViewModel @Inject constructor(
                     Log.d("HomeListVM", "collect success, size=${personList.size}")
 
                     _uiState.update { currentState ->
+                        val sortedPersons = sortPersons(
+                            persons = personList,
+                            sortType = currentState.currentSortType
+                        )
+
                         val normalizedQuery = currentState.searchQuery.trim()
 
                         val updatedSearchItems =
                             if (currentState.isSearchMode) {
                                 if (normalizedQuery.isBlank()) {
-                                    personList
+                                    sortedPersons
                                 } else {
-                                    personList.filter { item ->
+                                    sortedPersons.filter { item ->
                                         item.name.contains(normalizedQuery, ignoreCase = true)
                                     }
                                 }
@@ -164,6 +170,56 @@ class HomeListViewModel @Inject constructor(
                     )
                 }
             }
+
+            is HomeListEvent.OnSortIconClicked -> {
+                _uiState.update {
+                    it.copy(
+                        isSortMenuVisible = true
+                    )
+                }
+            }
+
+            is HomeListEvent.OnSortTypeSelected -> {
+                _uiState.update { currentState ->
+                    val sortedPersons = sortPersons(
+                        persons = currentState.persons,
+                        sortType = event.sortType
+                    )
+
+                    val normalizedQuery = currentState.searchQuery.trim()
+
+                    val updatedSearchItems =
+                        if (currentState.isSearchMode) {
+                            if (normalizedQuery.isBlank()) {
+                                sortedPersons
+                            } else {
+                                sortedPersons.filter { item ->
+                                    item.name.contains(normalizedQuery, ignoreCase = true)
+                                }
+                            }
+                        } else {
+                            emptyList()
+                        }
+
+                    currentState.copy(
+                        currentSortType = event.sortType,
+                        isSortMenuVisible = false,
+                        persons = sortedPersons,
+                        searchItems = updatedSearchItems,
+                        isSearchResultEmpty = currentState.isSearchMode &&
+                                normalizedQuery.isNotBlank() &&
+                                updatedSearchItems.isEmpty()
+                    )
+                }
+            }
+
+            is HomeListEvent.OnSortMenuDismissed -> {
+                _uiState.update {
+                    it.copy(
+                        isSortMenuVisible = false
+                    )
+                }
+            }
         }
     }
 
@@ -193,6 +249,19 @@ class HomeListViewModel @Inject constructor(
                 searchItems = result,
                 isSearchResultEmpty = query.isNotBlank() && result.isEmpty()
             )
+        }
+    }
+
+    private fun sortPersons(
+        persons : List<PersonListItem>,
+        sortType: SortType
+    ) : List<PersonListItem> {
+        Log.d("HomeListSort", "sortPersons called, sortType=$sortType, size=${persons.size}")
+        return when(sortType){
+            SortType.NEWEST -> persons.sortedByDescending { it.createdAt}
+            SortType.OLDEST -> persons.sortedBy { it.createdAt }
+            SortType.CLOSENESS_DESC -> persons.sortedByDescending { it.intimacy }
+            SortType.NAME_ASC -> persons.sortedBy { it.name.lowercase() }
         }
     }
 }
