@@ -54,4 +54,16 @@ class PersonRepositoryImpl (
         // 4. personDao.deleteByIds()
         // 5. 트랜잭션 적용
     }
+
+    override suspend fun updatePinnedState(
+        personId: Long,
+        pinned: Boolean,
+        pinnedAt: Long?
+    ) {
+        personDao.updatePinnedState(
+            personId = personId,
+            pinned = pinned,
+            pinnedAt = pinnedAt
+        )
+    }
 }

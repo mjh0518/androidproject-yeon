@@ -29,7 +29,9 @@ object AppModule {
             context,
             AppDataBase::class.java,
             "yeon_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration(true)
+            .build()
     }
 
     @Provides

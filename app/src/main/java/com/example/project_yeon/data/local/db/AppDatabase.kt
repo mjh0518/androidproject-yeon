@@ -11,7 +11,7 @@ import com.example.project_yeon.data.local.entity.*
         HiddenPersonEntity::class,
      //   SecurityConfigEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDataBase : RoomDatabase(){

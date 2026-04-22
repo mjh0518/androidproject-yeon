@@ -34,6 +34,7 @@ data class Person(
     val memo: String?,
 
     val pinned: Boolean,
+    val pinnedAt : Long?,
     val createdAt: Long,
     val updatedAt: Long
 )

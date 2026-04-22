@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_yeon.domain.person.model.PersonListItem
 import com.example.project_yeon.domain.person.usecase.ObservePersonListUseCase
+import com.example.project_yeon.domain.person.usecase.UpdatePinnedStateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Job
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HomeListViewModel @Inject constructor(
-    private val observePersonListUseCase: ObservePersonListUseCase
+    private val observePersonListUseCase: ObservePersonListUseCase,
+    private val updatePinnedStateUseCase: UpdatePinnedStateUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeListState())
     val uiState : StateFlow<HomeListState> = _uiState.asStateFlow()
@@ -52,10 +54,8 @@ class HomeListViewModel @Inject constructor(
                     }
                 }
                 .collect { personList ->
-                    Log.d("HomeListVM", "collect success, size=${personList.size}")
-
                     _uiState.update { currentState ->
-                        val sortedPersons = sortPersons(
+                        val displayPersons = buildDisplayPersons(
                             persons = personList,
                             sortType = currentState.currentSortType
                         )
@@ -65,9 +65,9 @@ class HomeListViewModel @Inject constructor(
                         val updatedSearchItems =
                             if (currentState.isSearchMode) {
                                 if (normalizedQuery.isBlank()) {
-                                    sortedPersons
+                                    displayPersons
                                 } else {
-                                    sortedPersons.filter { item ->
+                                    displayPersons.filter { item ->
                                         item.name.contains(normalizedQuery, ignoreCase = true)
                                     }
                                 }
@@ -77,7 +77,7 @@ class HomeListViewModel @Inject constructor(
 
                         currentState.copy(
                             isLoading = false,
-                            persons = personList,
+                            persons = displayPersons,
                             searchItems = updatedSearchItems,
                             isSearchResultEmpty = currentState.isSearchMode &&
                                     normalizedQuery.isNotBlank() &&
@@ -106,19 +106,18 @@ class HomeListViewModel @Inject constructor(
                 }
             }
             is HomeListEvent.OnPinClick -> {
-                _uiState.update { currentState ->
-                    val updatedPinnedIds =
-                        if (currentState.pinnedPersonIds.contains(event.personId)) {
-                            currentState.pinnedPersonIds - event.personId
-                        } else {
-                            currentState.pinnedPersonIds + event.personId
-                        }
+                viewModelScope.launch {
+                    val target = _uiState.value.persons.firstOrNull { it.personId == event.personId }
+                        ?: return@launch
 
-                    currentState.copy(
-                        pinnedPersonIds = updatedPinnedIds
+                    val nextPinned = !target.isPinned
+                    val nextPinnedAt = if (nextPinned) System.currentTimeMillis() else null
+                    updatePinnedStateUseCase(
+                        event.personId,
+                        nextPinned,
+                        nextPinnedAt
                     )
                 }
-                //TODO: 고정 기능 구현
             }
 
             is HomeListEvent.OnMoreDetailClick -> {
@@ -181,7 +180,7 @@ class HomeListViewModel @Inject constructor(
 
             is HomeListEvent.OnSortTypeSelected -> {
                 _uiState.update { currentState ->
-                    val sortedPersons = sortPersons(
+                    val displayPersons = buildDisplayPersons(
                         persons = currentState.persons,
                         sortType = event.sortType
                     )
@@ -191,9 +190,9 @@ class HomeListViewModel @Inject constructor(
                     val updatedSearchItems =
                         if (currentState.isSearchMode) {
                             if (normalizedQuery.isBlank()) {
-                                sortedPersons
+                                displayPersons
                             } else {
-                                sortedPersons.filter { item ->
+                                displayPersons.filter { item ->
                                     item.name.contains(normalizedQuery, ignoreCase = true)
                                 }
                             }
@@ -204,7 +203,7 @@ class HomeListViewModel @Inject constructor(
                     currentState.copy(
                         currentSortType = event.sortType,
                         isSortMenuVisible = false,
-                        persons = sortedPersons,
+                        persons = displayPersons,
                         searchItems = updatedSearchItems,
                         isSearchResultEmpty = currentState.isSearchMode &&
                                 normalizedQuery.isNotBlank() &&
@@ -263,5 +262,26 @@ class HomeListViewModel @Inject constructor(
             SortType.CLOSENESS_DESC -> persons.sortedByDescending { it.intimacy }
             SortType.NAME_ASC -> persons.sortedBy { it.name.lowercase() }
         }
+    }
+    private fun buildDisplayPersons(
+        persons: List<PersonListItem>,
+        sortType: SortType
+    ): List<PersonListItem> {
+        val pinnedPersons = persons
+            .filter { it.isPinned }
+            .sortedByDescending { it.pinnedAt ?: Long.MIN_VALUE }
+
+        val normalPersons = persons
+            .filterNot { it.isPinned }
+            .let { nonPinned ->
+                when (sortType) {
+                    SortType.NEWEST -> nonPinned.sortedByDescending { it.createdAt }
+                    SortType.OLDEST -> nonPinned.sortedBy { it.createdAt }
+                    SortType.CLOSENESS_DESC -> nonPinned.sortedByDescending { it.intimacy }
+                    SortType.NAME_ASC -> nonPinned.sortedBy { it.name.lowercase() }
+                }
+            }
+
+        return pinnedPersons + normalPersons
     }
 }

@@ -12,9 +12,10 @@ interface PersonDao {
     @Query("SELECT * FROM person WHERE personId = :personId")
     suspend fun getById(personId: Long): PersonEntity?
 
+
     // FR - 01 추가
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insert(entity: PersonEntity) : Long
+    suspend fun insert(entity: PersonEntity): Long
 
     // FR - 03 수정
     @Update
@@ -26,4 +27,17 @@ interface PersonDao {
     // FR - 02-5 삭제 -> 휴지통으로 이동
     @Query("DELETE FROM person WHERE personId IN (:personIds)")
     suspend fun deleteByIds(personIds: List<Long>)
+
+    @Query(
+        """
+    UPDATE person
+    SET pinned = :pinned,
+        pinnedAt = :pinnedAt
+    WHERE personId = :personId"""
+    )
+    suspend fun updatePinnedState(
+        personId: Long,
+        pinned: Boolean,
+        pinnedAt: Long?
+    )
 }

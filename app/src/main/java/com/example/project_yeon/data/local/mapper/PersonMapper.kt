@@ -66,8 +66,9 @@ fun PersonEntity.toDomain(): Person {
         profileImageUri = profileImageUri,
 
         pinned = pinned,
+        pinnedAt = pinnedAt,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
     )
 }
 

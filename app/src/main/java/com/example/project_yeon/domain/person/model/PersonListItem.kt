@@ -6,6 +6,7 @@ data class PersonListItem(
     val profileImageUri: String?,
     val intimacy: Int,
     val isPinned: Boolean,
+    val pinnedAt : Long?,
 
     // 1차 상세 확장에 필요한 요약 정보
     val birthDateText: String?,

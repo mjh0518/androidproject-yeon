@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.project_yeon.R
-import com.example.project_yeon.core.ui.component.button.PrimaryButton
 import com.example.project_yeon.core.ui.component.card.PersonExpandedSection
 import com.example.project_yeon.core.ui.component.card.PersonListCard
 import com.example.project_yeon.core.ui.theme.YeonOnPrimary
@@ -313,7 +312,7 @@ fun HomeListScreen(
                                     name = person.name,
                                     intimacy = person.intimacy,
                                     isExpanded = uiState.expandedPersonId == person.personId,
-                                    isPinned = uiState.pinnedPersonIds.contains(person.personId),
+                                    isPinned = person.isPinned,
                                     onExpandClick = {
                                         viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
                                     },
