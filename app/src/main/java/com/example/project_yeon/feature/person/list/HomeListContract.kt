@@ -27,6 +27,10 @@ data class HomeListState(
     val isSortMenuVisible : Boolean = false,
     val currentSortType: SortType = SortType.NEWEST,
 
+    val isDeleteMode: Boolean = false,
+    val selectedDeleteIds: Set<Long> = emptySet(),
+    val showDeleteConfirmDialog: Boolean = false,
+
 ) {
     val isEmpty: Boolean
         get() = !isLoading && persons.isEmpty()
@@ -46,6 +50,13 @@ sealed interface HomeListEvent {
     data object OnSortIconClicked : HomeListEvent
     data class OnSortTypeSelected(val sortType: SortType) : HomeListEvent
     data object OnSortMenuDismissed : HomeListEvent
+
+    data object OnDeleteModeEnterClicked : HomeListEvent
+    data object OnDeleteModeCancelClicked : HomeListEvent
+    data class OnDeleteItemChecked(val personId: Long) : HomeListEvent
+    data object OnDeleteSubmitClicked : HomeListEvent
+    data object OnDeleteConfirmClicked : HomeListEvent
+    data object OnDeleteDialogDismissed : HomeListEvent
 }
 
 sealed interface HomeListEffect {

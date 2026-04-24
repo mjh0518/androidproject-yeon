@@ -42,11 +42,14 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.material3)
     val nav_version = "2.9.7"
     val room_version = "2.8.4"
     val lifecycle_version = "2.10.0"
     val arch_version = "2.2.0"
 
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt:coil-compose:2.7.0") // 최신 버전 사용
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-runtime:${room_version}")
@@ -70,4 +73,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
 }

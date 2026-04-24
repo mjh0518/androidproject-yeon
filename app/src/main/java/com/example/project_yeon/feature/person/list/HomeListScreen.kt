@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.component.card.PersonExpandedSection
 import com.example.project_yeon.core.ui.component.card.PersonListCard
+import com.example.project_yeon.core.ui.component.dialog.FirstDeleteConfirmDialog
 import com.example.project_yeon.core.ui.theme.YeonOnPrimary
 import com.example.project_yeon.core.ui.theme.YeonTextMuted
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
@@ -224,7 +225,11 @@ fun HomeListScreen(
                     .systemBarsPadding(),
             ) {
                 HomeListHeader(
-                    title = if (uiState.isSearchMode) "인연 찾기" else "소중한 인연들",
+                    title = when {
+                        uiState.isDeleteMode -> "인연 삭제"
+                        uiState.isSearchMode -> "인연 찾기"
+                        else -> "소중한 인연들"
+                    },
                     fontNanumPen = font_nanum_pen,
                     isSortMenuVisible = uiState.isSortMenuVisible,
                     currentSortType = uiState.currentSortType,
@@ -248,10 +253,10 @@ fun HomeListScreen(
                         )
                     },
                     onDeleteClick = {
-                        // TODO
+                        viewModel.onEvent(HomeListEvent.OnDeleteModeEnterClicked)
                     },
                     onRecoveryClick = {
-                        // TODO
+                        navController.navigate("trash_screen")
                     },
                 )
 
@@ -263,81 +268,111 @@ fun HomeListScreen(
                     color = YeonTextOnBackGround.copy(alpha = 0.25f)
                 )
 
-                if (uiState.isSearchMode) {
-                    Spacer(modifier = Modifier.padding())
-
-                    HomeListSearchHeader(
-                        query = uiState.searchQuery,
-                        onQueryChange = { query ->
-                            viewModel.onEvent(HomeListEvent.OnSearchQueryChanged(query))
+                if (uiState.isDeleteMode) {
+                    HomeListDeleteModeContent(
+                        persons = uiState.persons,
+                        selectedIds = uiState.selectedDeleteIds,
+                        fontNanumPen = font_nanum_pen,
+                        onCheckedChange = { personId ->
+                            viewModel.onEvent(HomeListEvent.OnDeleteItemChecked(personId))
                         },
-                        onClearClick = {
-                            viewModel.onEvent(HomeListEvent.OnSearchClearClicked)
+                        onDeleteClick = {
+                            viewModel.onEvent(HomeListEvent.OnDeleteSubmitClicked)
                         },
-                        onCloseClick = {
-                            viewModel.onEvent(HomeListEvent.OnSearchCloseClicked)
-                        },
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-
-                    SearchResultSummary(
-                        query = uiState.searchQuery,
-                        resultCount = visiblePersons.size,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .align(Alignment.CenterHorizontally)
-                    )
-                }
-
-                if (uiState.isSearchMode && uiState.isSearchResultEmpty) {
-                    EmptySearchResultView(
-                        query = uiState.searchQuery,
-                        modifier = Modifier.fillMaxSize()
+                        onBackClick = {
+                            viewModel.onEvent(HomeListEvent.OnDeleteModeCancelClicked)
+                        }
                     )
                 } else {
-                    LazyColumn(
-                        modifier = Modifier.padding(top = 8.dp)
-                    ) {
-                        items(
-                            items = visiblePersons,
-                            key = { it.personId }
-                        ) { person ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                PersonListCard(
-                                    profileimage = person.profileImageUri,
-                                    name = person.name,
-                                    intimacy = person.intimacy,
-                                    isExpanded = uiState.expandedPersonId == person.personId,
-                                    isPinned = person.isPinned,
-                                    onExpandClick = {
-                                        viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
-                                    },
-                                    onPinClick = {
-                                        viewModel.onEvent(HomeListEvent.OnPinClick(person.personId))
-                                    }
-                                )
+                    if (uiState.isSearchMode) {
+                        HomeListSearchHeader(
+                            query = uiState.searchQuery,
+                            onQueryChange = { query ->
+                                viewModel.onEvent(HomeListEvent.OnSearchQueryChanged(query))
+                            },
+                            onClearClick = {
+                                viewModel.onEvent(HomeListEvent.OnSearchClearClicked)
+                            },
+                            onCloseClick = {
+                                viewModel.onEvent(HomeListEvent.OnSearchCloseClicked)
+                            },
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
 
-                                if (uiState.expandedPersonId == person.personId) {
-                                    PersonExpandedSection(
-                                        person = person,
-                                        onMoreDetailClick = {
-                                            viewModel.onEvent(HomeListEvent.OnMoreDetailClick(person.personId))
+                        SearchResultSummary(
+                            query = uiState.searchQuery,
+                            resultCount = visiblePersons.size,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                    }
+
+                    if (uiState.isSearchMode && uiState.isSearchResultEmpty) {
+                        EmptySearchResultView(
+                            query = uiState.searchQuery,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            items(
+                                items = visiblePersons,
+                                key = { it.personId }
+                            ) { person ->
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    PersonListCard(
+                                        profileimage = person.profileImageUri,
+                                        name = person.name,
+                                        intimacy = person.intimacy,
+                                        isExpanded = uiState.expandedPersonId == person.personId,
+                                        isPinned = person.isPinned,
+                                        onExpandClick = {
+                                            viewModel.onEvent(HomeListEvent.OnExpandClick(person.personId))
+                                        },
+                                        onPinClick = {
+                                            viewModel.onEvent(HomeListEvent.OnPinClick(person.personId))
                                         }
                                     )
+
+                                    if (uiState.expandedPersonId == person.personId) {
+                                        PersonExpandedSection(
+                                            person = person,
+                                            onMoreDetailClick = {
+                                                viewModel.onEvent(
+                                                    HomeListEvent.OnMoreDetailClick(
+                                                        person.personId
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
             }
         }
+            if (uiState.showDeleteConfirmDialog) {
+                FirstDeleteConfirmDialog(
+                    fontNanumPen = font_nanum_pen,
+                    onDismiss = {
+                        viewModel.onEvent(HomeListEvent.OnDeleteDialogDismissed)
+                    },
+                    onConfirm = {
+                        viewModel.onEvent(HomeListEvent.OnDeleteConfirmClicked)
+                    }
+                )
+            }
     }
-    Log.d(
-        "HomeListState",
-        "isLoading=${uiState.isLoading}, error=${uiState.errorMessage}, isEmpty=${uiState.isEmpty}, size=${uiState.persons.size}"
-    )
+}
+Log.d(
+"HomeListState",
+"isLoading=${uiState.isLoading}, error=${uiState.errorMessage}, isEmpty=${uiState.isEmpty}, size=${uiState.persons.size}"
+)
 }

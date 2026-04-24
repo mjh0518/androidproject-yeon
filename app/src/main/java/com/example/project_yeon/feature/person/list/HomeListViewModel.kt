@@ -219,6 +219,71 @@ class HomeListViewModel @Inject constructor(
                     )
                 }
             }
+            is HomeListEvent.OnDeleteModeEnterClicked -> {
+                _uiState.update {
+                    it.copy(
+                        isDeleteMode = true,
+                        expandedPersonId = null,
+                        isSearchMode = false,
+                        searchQuery = "",
+                        searchItems = emptyList(),
+                        isSearchResultEmpty = false,
+                        isSortMenuVisible = false,
+                        selectedDeleteIds = emptySet(),
+                        showDeleteConfirmDialog = false
+                    )
+                }
+            }
+
+            is HomeListEvent.OnDeleteModeCancelClicked -> {
+                _uiState.update {
+                    it.copy(
+                        isDeleteMode = false,
+                        selectedDeleteIds = emptySet(),
+                        showDeleteConfirmDialog = false
+                    )
+                }
+            }
+
+            is HomeListEvent.OnDeleteItemChecked -> {
+                _uiState.update { currentState ->
+                    val updatedIds =
+                        if (currentState.selectedDeleteIds.contains(event.personId)) {
+                            currentState.selectedDeleteIds - event.personId
+                        } else {
+                            currentState.selectedDeleteIds + event.personId
+                        }
+
+                    currentState.copy(
+                        selectedDeleteIds = updatedIds
+                    )
+                }
+            }
+
+            is HomeListEvent.OnDeleteSubmitClicked -> {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        showDeleteConfirmDialog = currentState.selectedDeleteIds.isNotEmpty()
+                    )
+                }
+            }
+
+            is HomeListEvent.OnDeleteDialogDismissed -> {
+                _uiState.update {
+                    it.copy(
+                        showDeleteConfirmDialog = false
+                    )
+                }
+            }
+
+            is HomeListEvent.OnDeleteConfirmClicked -> {
+                _uiState.update {
+                    it.copy(
+                        showDeleteConfirmDialog = false
+                    )
+                }
+                // TODO: 다음 주차에 HiddenPerson 이관 로직 연결
+            }
         }
     }
 

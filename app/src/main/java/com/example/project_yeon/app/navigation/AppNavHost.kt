@@ -71,11 +71,7 @@ fun AppNavHost(
             )
         }
         composable(AppRoute.Trash.route) {
-            TrashScreen(
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+            TrashScreen(navController = navController)
         }
     }
 }

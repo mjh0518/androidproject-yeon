@@ -10,5 +10,5 @@ sealed class AppRoute(val route: String) {
     data object ModifyPerson : AppRoute("modify_person/{personId}") {
         fun createRoute(personId: Long): String = "modify_person/$personId"
     }
-    data object Trash : AppRoute("trash")
+    data object Trash : AppRoute("trash_screen")
 }
