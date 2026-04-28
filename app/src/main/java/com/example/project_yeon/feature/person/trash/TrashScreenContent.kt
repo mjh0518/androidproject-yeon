@@ -9,15 +9,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
-import com.example.project_yeon.domain.person.model.PersonListItem
+import com.example.project_yeon.feature.person.trash.model.TrashPersonUiModel
 
 @Composable
 fun TrashScreenContent(
-    persons: List<PersonListItem>,
+    persons: List<TrashPersonUiModel>,
     fontNanumPen: FontFamily,
     onBackClick: () -> Unit,
     onDeleteClick: (Long) -> Unit,

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.project_yeon.domain.person.model.PersonListItem
+import com.example.project_yeon.domain.person.usecase.MoveToTrashUseCase
 import com.example.project_yeon.domain.person.usecase.ObservePersonListUseCase
 import com.example.project_yeon.domain.person.usecase.UpdatePinnedStateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,9 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HomeListViewModel @Inject constructor(
     private val observePersonListUseCase: ObservePersonListUseCase,
-    private val updatePinnedStateUseCase: UpdatePinnedStateUseCase
+    private val updatePinnedStateUseCase: UpdatePinnedStateUseCase,
+    private val moveToTrashUseCase: MoveToTrashUseCase,
+
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeListState())
     val uiState : StateFlow<HomeListState> = _uiState.asStateFlow()
@@ -282,7 +285,23 @@ class HomeListViewModel @Inject constructor(
                         showDeleteConfirmDialog = false
                     )
                 }
-                // TODO: 다음 주차에 HiddenPerson 이관 로직 연결
+                viewModelScope.launch {
+                    val ids = _uiState.value.selectedDeleteIds.toList()
+                    if(ids.isEmpty()){
+                        _uiState.update {
+                            it.copy(showDeleteConfirmDialog = false)
+                        }
+                        return@launch
+                    }
+                    moveToTrashUseCase(ids)
+                    _uiState.update {
+                        it.copy(
+                            isDeleteMode = false,
+                            selectedDeleteIds = emptySet(),
+                            showDeleteConfirmDialog = false,
+                        )
+                    }
+                }
             }
         }
     }

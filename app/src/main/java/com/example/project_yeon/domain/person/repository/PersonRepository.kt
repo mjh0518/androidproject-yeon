@@ -18,14 +18,13 @@ interface PersonRepository {
     // 인연 수정을 수행할 기능
     suspend fun updatePerson(request: PersonUpdateRequest) : ResultWrapper<Unit>
 
-    // 인연 삭제 - 보관함으로 이동시킬 기능
-    suspend fun moveToTrash(personIds : List<Long>)
-
     // 인연 고정
     suspend fun updatePinnedState(
         personId: Long,
         pinned: Boolean,
         pinnedAt: Long?
     )
+    // 인연 삭제 - 보관함으로 이동시킬 기능
+    suspend fun moveToTrash(personIds : List<Long>)
 
 }

@@ -1,39 +1,45 @@
 package com.example.project_yeon.data.person.repository
 
+import androidx.room.withTransaction
 import com.example.project_yeon.data.local.dao.HiddenPersonDao
 import com.example.project_yeon.data.local.dao.PersonDao
+import com.example.project_yeon.data.local.db.AppDataBase
 import com.example.project_yeon.data.local.entity.HiddenPersonEntity
+import com.example.project_yeon.data.local.entity.PersonEntity
 import com.example.project_yeon.data.local.mapper.toDomain
 import com.example.project_yeon.domain.person.model.HiddenPerson
 import com.example.project_yeon.domain.person.repository.HiddenPersonRepository
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class HiddenPersonRepositoryImpl (
     private val personDao: PersonDao,
-    private val hiddenpersonDao : HiddenPersonDao
+    private val hiddenpersonDao : HiddenPersonDao,
+    private val appDataBase: AppDataBase
 ) : HiddenPersonRepository{
-    override suspend fun getHiddenPerson(id: Long) =
-        hiddenpersonDao.getById(id)?.toDomain()
+    private val gson = Gson()
+
+    override suspend fun getHiddenPerson(id: Long): HiddenPerson? =
+        hiddenpersonDao.getHiddenPersonById(id)?.toDomain()
 
     override fun getHiddenPersons(): Flow<List<HiddenPerson>> =
-        hiddenpersonDao.getAllFlow().map{entities ->
-            entities.map{it.toDomain()}
+        hiddenpersonDao.observeHiddenPersons().map { entities ->
+            entities.map { it.toDomain() }
         }
 
     override suspend fun restorePersonFromTrash(personId: Long) {
-        // TODO:
-        // 1. hiddenPersonDao.getById(personId)
-        // 2. meta 역직렬화 → PersonEntity 복원
-        // 3. personDao.insert()
-        // 4. hiddenPersonDao.deleteById()
-        // 5. 트랜잭션 적용
+        appDataBase.withTransaction {
+            val hiddenPerson = hiddenpersonDao.getHiddenPersonById(personId) ?: return@withTransaction
+            val restoredPerson = gson.fromJson(hiddenPerson.meta, PersonEntity::class.java)
+
+            personDao.insertOrReplace(restoredPerson)
+            hiddenpersonDao.deleteHiddenPersonById(personId)
+        }
     }
 
     override suspend fun permanentlyDeleteFromTrash(personId: Long) {
-            // TODO:
-        // 1. hiddenPersonDao.deleteById()
-        // (복구 불가, 단순 삭제)
+        hiddenpersonDao.deleteHiddenPersonById(personId)
     }
 }
 

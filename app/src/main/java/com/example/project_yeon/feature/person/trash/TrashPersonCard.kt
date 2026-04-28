@@ -32,10 +32,11 @@ import androidx.compose.ui.unit.sp
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
 import com.example.project_yeon.domain.person.model.PersonListItem
+import com.example.project_yeon.feature.person.trash.model.TrashPersonUiModel
 
 @Composable
 fun TrashPersonCard(
-    person: PersonListItem,
+    person: TrashPersonUiModel,
     fontNanumPen: FontFamily,
     onDeleteClick: () -> Unit,
     onRestoreClick: () -> Unit,

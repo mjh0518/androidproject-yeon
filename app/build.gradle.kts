@@ -48,6 +48,7 @@ dependencies {
     val lifecycle_version = "2.10.0"
     val arch_version = "2.2.0"
 
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt:coil-compose:2.7.0") // 최신 버전 사용

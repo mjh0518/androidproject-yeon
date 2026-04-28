@@ -1,19 +1,27 @@
 package com.example.project_yeon.data.person.repository
 
+import androidx.room.withTransaction
 import com.example.project_yeon.core.common.result.ResultWrapper
 import com.example.project_yeon.core.common.result.safeCall
 import com.example.project_yeon.data.local.dao.HiddenPersonDao
 import com.example.project_yeon.data.local.dao.PersonDao
+import com.example.project_yeon.data.local.db.AppDataBase
+import com.example.project_yeon.data.local.entity.HiddenPersonEntity
 import com.example.project_yeon.data.local.mapper.toDomain
 import com.example.project_yeon.data.local.mapper.toEntity
+import com.example.project_yeon.data.local.mapper.toHiddenEntity
 import com.example.project_yeon.domain.person.model.*
 import com.example.project_yeon.domain.person.repository.PersonRepository
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.*
 
 class PersonRepositoryImpl (
     private val personDao: PersonDao,
-    private val hiddenpersonDao : HiddenPersonDao
+    private val hiddenpersonDao : HiddenPersonDao,
+    private val appDataBase : AppDataBase,
 ) : PersonRepository{
+
+    private val gson = Gson()
 
     override suspend fun getPerson(id: Long) =
         personDao.getById(id)!!.toDomain()
@@ -46,13 +54,25 @@ class PersonRepositoryImpl (
         }
     }
 
-    override suspend fun moveToTrash(personIds: List<Long>){
-        // TODO:
-        // 1. personDao.getByIds(personIds)
-        // 2. PersonEntity -> HiddenPersonEntity 변환 (meta 직렬화 포함)
-        // 3. hiddenPersonDao.insertAll()
-        // 4. personDao.deleteByIds()
-        // 5. 트랜잭션 적용
+    override suspend fun moveToTrash(personIds: List<Long>) {
+        appDataBase.withTransaction {
+            val persons = personDao.getPersonsByIds(personIds)
+            if (persons.isEmpty()) return@withTransaction
+
+            val now = System.currentTimeMillis()
+            val expiryAt = now + 30L * 24L * 60L * 60L * 1000L
+
+            val hiddenPersons = persons.map { person ->
+                person.toHiddenEntity(
+                    deletedAt = now,
+                    expiryAt = expiryAt,
+                    meta = gson.toJson(person)
+                )
+            }
+
+            hiddenpersonDao.insertHiddenPersons(hiddenPersons)
+            personDao.deletePersonsByIds(personIds)
+        }
     }
 
     override suspend fun updatePinnedState(

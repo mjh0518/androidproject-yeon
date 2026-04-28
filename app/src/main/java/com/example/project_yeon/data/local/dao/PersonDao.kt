@@ -21,13 +21,6 @@ interface PersonDao {
     @Update
     suspend fun update(entity: PersonEntity)
 
-    @Delete
-    suspend fun delete(entity: PersonEntity)
-
-    // FR - 02-5 삭제 -> 휴지통으로 이동
-    @Query("DELETE FROM person WHERE personId IN (:personIds)")
-    suspend fun deleteByIds(personIds: List<Long>)
-
     @Query(
         """
     UPDATE person
@@ -40,4 +33,14 @@ interface PersonDao {
         pinned: Boolean,
         pinnedAt: Long?
     )
+
+    @Query("SELECT * FROM person WHERE personId IN (:ids)")
+    suspend fun getPersonsByIds(ids: List<Long>): List<PersonEntity>
+
+    // FR - 02 - 4 삭제 -> 휴지통으로 이동
+    @Query("DELETE FROM person WHERE personId IN (:ids)")
+    suspend fun deletePersonsByIds(ids: List<Long>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrReplace(entity: PersonEntity)
 }

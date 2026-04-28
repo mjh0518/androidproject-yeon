@@ -30,6 +30,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,31 +50,22 @@ import com.example.project_yeon.domain.person.model.PersonListItem
 
 @Composable
 fun TrashScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: TrashViewModel,
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
 
-    var showPermanentDeleteDialog by remember { mutableStateOf(false) }
-    var selectedDeletePersonId by remember { mutableStateOf<Long?>(null) }
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is TrashEffect.NavigateBack -> {
+                    navController.popBackStack()
+                }
+            }
+        }
+    }
 
-    val dummyPersons = listOf(
-        PersonListItem(
-            personId = 1001L,
-            name = "홍길동",
-            profileImageUri = null,
-            intimacy = 3,
-            isPinned = false,
-            pinnedAt = null,
-            birthDateText = "1998-05-12",
-            mbtiText = "INFJ",
-            jobText = "학생",
-            recentMeetPlaceText = "카페 연",
-            genderText = "남성",
-            personalityText = "차분함",
-            lastContactDateText = "2026-04-20",
-            createdAt = System.currentTimeMillis()
-        )
-    )
 
     Box(
         modifier = Modifier
@@ -84,34 +77,27 @@ fun TrashScreen(
             .systemBarsPadding()
     ) {
         TrashScreenContent(
-            persons = dummyPersons,
+            persons = uiState.persons,
             fontNanumPen = font_nanum_pen,
             onBackClick = {
-                navController.popBackStack()
+                viewModel.onEvent(TrashEvent.OnBackClick)
             },
             onDeleteClick = { personId ->
-                selectedDeletePersonId = personId
-                showPermanentDeleteDialog = true
+                viewModel.onEvent(TrashEvent.OnPermanentDeleteClick(personId))
             },
             onRestoreClick = { personId ->
-                Log.d("TrashScreen", "개별 복원 클릭: personId=$personId")
+                viewModel.onEvent(TrashEvent.OnRestoreClick(personId))
             }
         )
 
-        if (showPermanentDeleteDialog) {
+        if (uiState.showPermanentDeleteDialog) {
             PermanentDeleteConfirmDialog(
                 fontNanumPen = font_nanum_pen,
                 onDismiss = {
-                    showPermanentDeleteDialog = false
-                    selectedDeletePersonId = null
+                    viewModel.onEvent(TrashEvent.OnDialogDismiss)
                 },
                 onConfirm = {
-                    Log.d(
-                        "TrashScreen",
-                        "영구 삭제 확정: personId=$selectedDeletePersonId"
-                    )
-                    showPermanentDeleteDialog = false
-                    selectedDeletePersonId = null
+                    viewModel.onEvent(TrashEvent.OnPermanentDeleteConfirmClick)
                 }
             )
         }
