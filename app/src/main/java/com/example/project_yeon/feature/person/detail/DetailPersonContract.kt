@@ -1,5 +1,7 @@
 package com.example.project_yeon.feature.person.detail
 
+import com.example.project_yeon.core.common.result.ResultWrapper
+
 data class DetailPersonUiState(
     val personId: Long = -1L,
     val isLoading: Boolean = false,
@@ -34,9 +36,9 @@ data class DetailPersonUiModel(
     val recentTalk: String? = "",
     val memo: String? = "",
     val memoryImageUris: List<String> = emptyList(),
-    val phoneMasked: String? = "",
-    val addressMasked: String? = "",
-    val snsMasked: String? = ""
+    val phone: String? = "",
+    val address: String? = "",
+    val sns: String? = "",
 )
 
 sealed interface DetailPersonEvent {
@@ -44,11 +46,21 @@ sealed interface DetailPersonEvent {
     data object OnModifyClick : DetailPersonEvent
     data object OnRetryClick : DetailPersonEvent
     data object OnSensitiveInfoClick : DetailPersonEvent
+
+    data class OnSensitiveAuthResult(
+        val result: ResultWrapper<Unit>
+    ) : DetailPersonEvent
+
+    data class OnModifyAuthResult(
+        val result: ResultWrapper<Unit>
+    ) : DetailPersonEvent
+
 }
 
 sealed interface DetailPersonEffect {
     data object NavigateBack : DetailPersonEffect
     data class NavigateToModify(val personId: Long) : DetailPersonEffect
     data object RequestSensitiveAuth : DetailPersonEffect
+    data object RequestModifyAuth : DetailPersonEffect
     data class ShowSnackbar(val message: String) : DetailPersonEffect
 }

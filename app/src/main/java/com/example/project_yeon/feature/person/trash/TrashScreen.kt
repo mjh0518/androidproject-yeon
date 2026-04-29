@@ -43,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.component.dialog.PermanentDeleteConfirmDialog
@@ -51,7 +52,7 @@ import com.example.project_yeon.domain.person.model.PersonListItem
 @Composable
 fun TrashScreen(
     navController: NavController,
-    viewModel: TrashViewModel,
+    viewModel: TrashViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))

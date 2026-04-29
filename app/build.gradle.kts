@@ -48,6 +48,7 @@ dependencies {
     val lifecycle_version = "2.10.0"
     val arch_version = "2.2.0"
 
+    implementation("androidx.biometric:biometric:1.1.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")

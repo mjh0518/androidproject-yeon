@@ -9,6 +9,8 @@ import com.example.project_yeon.data.person.repository.PersonRepositoryImpl
 import com.example.project_yeon.domain.person.repository.PersonRepository
 import com.example.project_yeon.domain.person.usecase.CreatePersonUseCase
 import com.example.project_yeon.domain.person.usecase.ValidatePersonDraftUseCase
+import com.example.project_yeon.data.person.repository.HiddenPersonRepositoryImpl
+import com.example.project_yeon.domain.person.repository.HiddenPersonRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,11 +50,26 @@ object AppModule {
     @Singleton
     fun providePersonRepository(
         personDao: PersonDao,
-        hiddenPersonDao: HiddenPersonDao
+        hiddenPersonDao: HiddenPersonDao,
+        appDataBase: AppDataBase
     ): PersonRepository {
         return PersonRepositoryImpl(
             personDao = personDao,
             hiddenpersonDao = hiddenPersonDao,
+            appDataBase = appDataBase
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideHiddenPersonRepository(
+        hiddenPersonDao: HiddenPersonDao,
+        personDao: PersonDao,
+        appDataBase: AppDataBase
+    ): HiddenPersonRepository {
+        return HiddenPersonRepositoryImpl(
+            personDao = personDao,
+            hiddenpersonDao = hiddenPersonDao,
+            appDataBase = appDataBase
         )
     }
 

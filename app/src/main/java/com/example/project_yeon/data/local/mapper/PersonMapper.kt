@@ -174,9 +174,9 @@ fun Person.toDetailPersonUiModel(): DetailPersonUiModel {
         recentMetPlace = recentMetPlace,
         recentTalk = memorableConversationTalk,
         memoryImageUris = memoryImageUris,
-        phoneMasked = phoneNumber,
-        addressMasked = livingArea,
-        snsMasked = snsLink,
+        phone = phoneNumber,
+        address = livingArea,
+        sns = snsLink,
         memo = memo,
     )
 }

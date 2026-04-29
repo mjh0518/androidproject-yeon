@@ -19,19 +19,24 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.project_yeon.R
 import com.example.project_yeon.app.navigation.AppRoute
+import com.example.project_yeon.core.common.result.AppError
+import com.example.project_yeon.core.common.result.ResultWrapper
 import com.example.project_yeon.core.ui.theme.YeonOnPrimary
 import com.example.project_yeon.core.ui.theme.YeonTextMuted
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
+import com.example.project_yeon.data.security.auth.BiometricAuthenticator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +47,10 @@ fun DetailPersonScreen(
     val font_nanum_pen = FontFamily(Font(R.font.nanumpen, FontWeight.Normal))
     val font_nanum_gyuri = FontFamily(Font(R.font.nanumgyurieuilrgi, FontWeight.Normal))
     val uiState by viewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
+    val activity = context as FragmentActivity
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val currentBackStackEntry = navController.currentBackStackEntry
     val updated by currentBackStackEntry
@@ -71,11 +80,71 @@ fun DetailPersonScreen(
                 }
 
                 DetailPersonEffect.RequestSensitiveAuth -> {
-                    // FR-04에서 처리
+                    BiometricAuthenticator(activity).authenticate(
+                        title = "보안 정보 확인",
+                        subtitle = "연락처, 거주지, SNS 정보를 확인하려면 인증이 필요합니다.",
+                        onSuccess = {
+                            viewModel.onEvent(
+                                DetailPersonEvent.OnSensitiveAuthResult(
+                                    ResultWrapper.Success(Unit)
+                                )
+                            )
+                        },
+                        onError = { message ->
+                            viewModel.onEvent(
+                                DetailPersonEvent.OnSensitiveAuthResult(
+                                    ResultWrapper.Error(
+                                        AppError.Unknown(message)
+                                    )
+                                )
+                            )
+                        },
+                        onFailed = {
+                            viewModel.onEvent(
+                                DetailPersonEvent.OnSensitiveAuthResult(
+                                    ResultWrapper.Error(
+                                        AppError.Unknown("인증에 실패했습니다.")
+                                    )
+                                )
+                            )
+                        }
+                    )
+                }
+
+                DetailPersonEffect.RequestModifyAuth -> {
+                    BiometricAuthenticator(activity).authenticate(
+                        title = "수정 모드 진입",
+                        subtitle = "인연 정보를 수정하려면 인증이 필요합니다.",
+                        onSuccess = {
+                            viewModel.onEvent(
+                                DetailPersonEvent.OnModifyAuthResult(
+                                    ResultWrapper.Success(Unit)
+                                )
+                            )
+                        },
+                        onError = { message ->
+                            viewModel.onEvent(
+                                DetailPersonEvent.OnModifyAuthResult(
+                                    ResultWrapper.Error(
+                                        AppError.Unknown(message)
+                                    )
+                                )
+                            )
+                        },
+                        onFailed = {
+                            viewModel.onEvent(
+                                DetailPersonEvent.OnModifyAuthResult(
+                                    ResultWrapper.Error(
+                                        AppError.Unknown("인증에 실패했습니다.")
+                                    )
+                                )
+                            )
+                        }
+                    )
                 }
 
                 is DetailPersonEffect.ShowSnackbar -> {
-                    // 필요하면 snackbar 처리
+                    snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }
@@ -90,6 +159,9 @@ fun DetailPersonScreen(
 
         Scaffold(
             containerColor = Color.Transparent,
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            },
             topBar = {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -270,10 +342,10 @@ fun DetailPersonScreen(
                         item {
                             DetailSensitiveInfoSection(
                                 person = person,
-                                /*unlocked = uiState.isSensitiveInfoUnlocked,
+                                unlocked = uiState.isSensitiveInfoUnlocked,
                                 onUnlockClick = {
                                     viewModel.onEvent(DetailPersonEvent.OnSensitiveInfoClick)
-                                }*/
+                                }
                             )
                         }
                         item {

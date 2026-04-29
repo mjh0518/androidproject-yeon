@@ -43,14 +43,24 @@ class DetailPersonViewModel @Inject constructor(
     fun onEvent(event: DetailPersonEvent) {
         when (event) {
             DetailPersonEvent.OnBackClick -> emitEffect(DetailPersonEffect.NavigateBack)
-            DetailPersonEvent.OnModifyClick -> emitEffect(
-                DetailPersonEffect.NavigateToModify(personId)
-            )
-            DetailPersonEvent.OnRetryClick -> {
-                // 추후 실제 재조회
+            DetailPersonEvent.OnModifyClick -> {
+                emitEffect(DetailPersonEffect.RequestModifyAuth)
             }
+
             DetailPersonEvent.OnSensitiveInfoClick -> {
                 emitEffect(DetailPersonEffect.RequestSensitiveAuth)
+            }
+
+            is DetailPersonEvent.OnSensitiveAuthResult -> {
+                handleSensitiveAuthResult(event.result)
+            }
+
+            is DetailPersonEvent.OnModifyAuthResult -> {
+                handleModifyAuthResult(event.result)
+            }
+
+            DetailPersonEvent.OnRetryClick -> {
+                loadPersonDetail()
             }
         }
     }
@@ -82,9 +92,9 @@ class DetailPersonViewModel @Inject constructor(
             recentTalk = "요즘 일이 많아서 정신이 없지만, 그래도 주말엔 잠깐이라도 쉬려고 한다고 이야기했음.",
             memo = "생일 선물은 실용적인 걸 좋아하는 편. 단 음식은 잘 안 먹고, 커피는 라떼보다 아메리카노를 더 선호함.",
             memoryImageUris = emptyList(),
-            phoneMasked = "010-1234-5678",
-            addressMasked = "서울시 강동구",
-            snsMasked = "@yeon_memory"
+            phone = "",
+            address = "",
+            sns = ""
         )
     }
     private fun loadPersonDetail() {
@@ -106,6 +116,56 @@ class DetailPersonViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     errorMessage = e.message ?: "상세 정보를 불러오지 못했습니다."
+                )
+            }
+        }
+    }
+    private fun handleSensitiveAuthResult(
+        result: ResultWrapper<Unit>
+    ) {
+        when (result) {
+            is ResultWrapper.Success -> {
+                _uiState.update {
+                    it.copy(
+                        isSensitiveInfoUnlocked = true,
+                        isAuthInProgress = false
+                    )
+                }
+            }
+
+            is ResultWrapper.Error -> {
+                _uiState.update {
+                    it.copy(
+                        isSensitiveInfoUnlocked = false,
+                        isAuthInProgress = false
+                    )
+                }
+
+                emitEffect(
+                    DetailPersonEffect.ShowSnackbar("인증에 실패했습니다.")
+                )
+            }
+        }
+    }
+    private fun handleModifyAuthResult(
+        result: ResultWrapper<Unit>
+    ) {
+        when (result) {
+            is ResultWrapper.Success -> {
+                val personId = _uiState.value.person.id
+
+                if (personId > 0L) {
+                    emitEffect(DetailPersonEffect.NavigateToModify(personId))
+                } else {
+                    emitEffect(
+                        DetailPersonEffect.ShowSnackbar("수정할 인연 정보를 찾을 수 없습니다.")
+                    )
+                }
+            }
+
+            is ResultWrapper.Error -> {
+                emitEffect(
+                    DetailPersonEffect.ShowSnackbar("인증에 실패하여 수정 모드로 진입할 수 없습니다.")
                 )
             }
         }
