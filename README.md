@@ -191,17 +191,23 @@ FR-01 인연 추가 화면과 FR-03 인연 수정 화면은 유사한 입력 구
 
 ## 화면 구성
 
-현재 앱은 다음과 같은 주요 화면으로 구성되어 있습니다.  
-스크린샷은 정리 후 추가할 예정입니다.
+앱의 주요 화면과 기능 흐름은 다음과 같습니다.
 
-| 화면 | 설명 |
+| Splash(앱 실행 직후) |
+|---|
+| <img src="docs/images/splash.png" width="240"/> |
+
+| 기본 목록 | 검색하기 |
 |---|---|
-| SplashScreen | 앱 진입 시 표시되는 브랜드 화면 |
-| HomeListScreen | 등록된 인연 목록, 검색, 정렬, 삭제 모드를 제공하는 메인 화면 |
-| AddPersonScreen | 새로운 인연 정보를 입력하고 저장하는 화면 |
-| DetailPersonScreen | 인연의 상세 정보와 민감 정보를 확인하는 화면 |
-| ModifyPersonScreen | 기존 인연 정보를 수정하는 화면 |
-| TrashScreen | 삭제된 인연을 복원하거나 영구 삭제하는 보관함 화면 |
+| <img src="docs/images/home_list.png" width="240"/> | <img src="docs/images/home_list_search.png" width="240"/> |
+
+| 상세정보 화면 | 수정하기 |
+|---|---|
+| <img src="docs/images/detail_person.png" width="240"/> | <img src="docs/images/modify_person.png" width="240"/> |
+
+| 삭제 하기 | 휴지통 & 복원하기 |
+|---|---|
+| <img src="docs/images/delete_person.png" width="240"/> | <img src="docs/images/trash.png" width="240"/> |
 
 ## 실행 환경
 
