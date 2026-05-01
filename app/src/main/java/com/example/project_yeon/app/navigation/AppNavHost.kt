@@ -9,12 +9,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.project_yeon.feature.person.splash.SplashScreen
 import com.example.project_yeon.feature.person.add.AddPersonScreen
 import com.example.project_yeon.feature.person.detail.DetailPersonScreen
 import com.example.project_yeon.feature.person.list.HomeListScreen
 import com.example.project_yeon.feature.person.modify.ModifyPersonScreen
 import com.example.project_yeon.feature.person.trash.TrashScreen
+import com.example.project_yeon.feature.splash.SplashScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

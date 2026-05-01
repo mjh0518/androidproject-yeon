@@ -1,18 +1,11 @@
 package com.example.project_yeon.core.ui.component.dialog
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import com.example.project_yeon.core.ui.component.inputFfiled.YeonOutlinedTextField
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import com.example.project_yeon.R
 
 @Composable
 fun SnsLinkInputDialog(
@@ -23,45 +16,29 @@ fun SnsLinkInputDialog(
 ) {
     if (!showDialog) return
 
-    var inputValue by remember { mutableStateOf(initialValue) }
+    val fontNanumGyuri = FontFamily(
+        Font(R.font.nanumgyurieuilrgi, FontWeight.Normal)
+    )
 
-    LaunchedEffect(initialValue, showDialog) {
-        if (showDialog) {
-            inputValue = initialValue
-        }
-    }
+    val fontNanumPen = FontFamily(
+        Font(R.font.nanumpen, FontWeight.Normal)
+    )
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text("대표 SNS 링크 입력")
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                YeonOutlinedTextField(
-                    value = inputValue,
-                    onValueChange = { inputValue = it },
-                    label = "",
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirm(inputValue.trim())
-                    onDismiss()
-                }
-            ) {
-                Text("확인")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("취소")
-            }
+    YeonInputDialog(
+        title = "대표 SNS 링크 입력",
+        initialValue = initialValue,
+        hint = "예: https://instagram.com/...",
+        confirmText = "확인",
+        dismissText = "취소",
+        clearText = "비우기",
+        keyboardType = KeyboardType.Uri,
+        singleLine = true,
+        titleFont = fontNanumGyuri,
+        bodyFont = fontNanumPen,
+        onDismiss = onDismiss,
+        onConfirm = { value ->
+            onConfirm(value.trim())
+            onDismiss()
         }
     )
 }
