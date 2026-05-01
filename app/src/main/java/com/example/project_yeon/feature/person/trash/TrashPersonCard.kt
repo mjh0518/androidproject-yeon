@@ -2,8 +2,6 @@ package com.example.project_yeon.feature.person.trash
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +16,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,9 +26,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import com.example.project_yeon.R
 import com.example.project_yeon.core.ui.theme.YeonTextOnBackGround
-import com.example.project_yeon.domain.person.model.PersonListItem
 import com.example.project_yeon.feature.person.trash.model.TrashPersonUiModel
 
 @Composable
@@ -61,13 +61,19 @@ fun TrashPersonCard(
                 .padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
+            AsyncImage(
+                model = person.profileImageUri,
+                contentDescription = "${person.name} 프로필 이미지",
                 modifier = Modifier
                     .size(42.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .background(
                         color = Color(0xFFE3E3E3),
-                        shape = RoundedCornerShape(4.dp)
-                    )
+                        shape = RoundedCornerShape(8.dp)
+                    ),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = R.drawable.profile_default),
+                error = painterResource(id = R.drawable.profile_default)
             )
 
             Spacer(modifier = Modifier.width(16.dp))
